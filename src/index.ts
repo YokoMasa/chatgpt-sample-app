@@ -1,10 +1,23 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import express from "express";
+import express, { type ErrorRequestHandler } from "express";
 import z from "zod";
+import { handlebarsEngine } from "./view/HandlebarsEngine.js";
+import MyPageController from "./controller/MyPageController.js";
+import NotFoundController from "./controller/NotFoundController.js";
 
 const expressApp = express();
+
+// view settings
+expressApp.engine("html", handlebarsEngine);
+expressApp.set("view engine", "html");
+expressApp.set("views", "src/view/templates");
+
+expressApp.set("x-powered-by", false);
 expressApp.use(express.json());
+
+// controllers
+expressApp.use("/mypage", MyPageController);
 
 const mcpServer = new McpServer({
   name: 'example-server',
@@ -61,6 +74,19 @@ expressApp.post('/mcp', async (req, res) => {
     }
   }
 });
+
+// Not Found Page
+expressApp.all(/.*/, NotFoundController);
+
+// Error Page
+expressApp.use(((error, _, res, next) => {
+  console.error(error);
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  res.render("error", { message: error.message ?? "予期せぬエラーが発生しました。" });
+}) as ErrorRequestHandler);
 
 const port = parseInt(process.env.PORT || '3000');
 expressApp.listen(port, () => {
