@@ -2,10 +2,17 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import express, { type ErrorRequestHandler } from "express";
 import z from "zod";
+import session from "express-session";
 import { handlebarsEngine } from "./view/HandlebarsEngine.js";
 import MyPageController from "./controller/MyPageController.js";
 import NotFoundController from "./controller/NotFoundController.js";
 import LoginController from "./controller/LoginController.js";
+
+declare module 'express-session' {
+  interface SessionData {
+    userId: string;
+  }
+}
 
 const expressApp = express();
 
@@ -16,6 +23,14 @@ expressApp.set("views", "src/view/templates");
 
 expressApp.set("x-powered-by", false);
 expressApp.use(express.json());
+expressApp.use(session({
+  secret: process.env.SESSION_SECRET == null
+    ? "session_secret"
+    : process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  unset: "destroy"
+}));
 
 // controllers
 expressApp.use("/login", LoginController);
