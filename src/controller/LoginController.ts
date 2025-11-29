@@ -5,7 +5,7 @@ controller.use(urlencoded());
 
 controller.get("/", (req, res) => {
   if (req.session.userId != null) {
-    res.redirect("/mypage");
+    res.redirect("/");
   } else {
     res.render("login");
   }
@@ -25,7 +25,7 @@ controller.post("/", (req, res, next) => {
   if (backTo != null && typeof backTo === "string" && !backTo.startsWith("http")) {
     res.redirect(backTo);
   } else {
-    res.redirect("/mypage");
+    res.redirect("/");
   }
 });
 

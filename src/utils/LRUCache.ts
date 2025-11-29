@@ -42,5 +42,8 @@ export class LRUCache<T> {
     this.cache.delete(key);
   }
 
+  public size(): number {
+    return this.cache.size;
+  }
 
 }

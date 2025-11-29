@@ -7,6 +7,7 @@ import { handlebarsEngine } from "./view/HandlebarsEngine.js";
 import MyPageController from "./controller/MyPageController.js";
 import NotFoundController from "./controller/NotFoundController.js";
 import LoginController from "./controller/LoginController.js";
+import { LRUCacheSessionStore } from "./auth/LRUCacheSessionStore.js";
 
 declare module 'express-session' {
   interface SessionData {
@@ -29,12 +30,14 @@ expressApp.use(session({
     : process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  unset: "destroy"
+  unset: "destroy",
+  store: new LRUCacheSessionStore(100)
 }));
 
 // controllers
 expressApp.use("/login", LoginController);
 expressApp.use("/mypage", MyPageController);
+expressApp.use("/", MyPageController);
 
 const mcpServer = new McpServer({
   name: 'example-server',
