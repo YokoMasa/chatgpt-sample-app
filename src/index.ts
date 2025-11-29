@@ -5,6 +5,7 @@ import z from "zod";
 import { handlebarsEngine } from "./view/HandlebarsEngine.js";
 import MyPageController from "./controller/MyPageController.js";
 import NotFoundController from "./controller/NotFoundController.js";
+import LoginController from "./controller/LoginController.js";
 
 const expressApp = express();
 
@@ -17,6 +18,7 @@ expressApp.set("x-powered-by", false);
 expressApp.use(express.json());
 
 // controllers
+expressApp.use("/login", LoginController);
 expressApp.use("/mypage", MyPageController);
 
 const mcpServer = new McpServer({

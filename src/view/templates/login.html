@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ログイン</title>
+  </head>
+  <body style="margin: 0;">
+    <main style="height: 100vh; display: flex; align-items: center; justify-content: center; padding: 0 16px;">
+      <div style="width: 450px; box-shadow: 4px 4px 12px #bbb; border-radius: 8px; padding: 16px;">
+        <h1>ログイン</h1>
+        <form
+          method="post"
+          style="display: grid; row-gap: 16px;">
+          <div style="display: grid;">
+            <label for="user_id">ログインID</label>
+            <input
+              id="user_id"
+              name="user_id"
+              style="padding: 4px; border-radius: 4px;"
+              required/>
+          </div>
+          <div style="display: grid;">
+            <label for="password">パスワード</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              style="padding: 4px; border-radius: 4px;"
+              required/>
+          </div>
+          <button
+            style="padding: 4px; border-radius: 4px; cursor: pointer;">
+            ログイン
+          </button>
+        </form>
+      </div>
+    </main>
+  </body>
+</html>
