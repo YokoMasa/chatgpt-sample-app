@@ -104,7 +104,6 @@ expressApp.use(((error, _, res, next) => {
   if (res.headersSent) {
     return next(error);
   }
-
   res.render("error", { message: error.message ?? "予期せぬエラーが発生しました。" });
 }) as ErrorRequestHandler);
 
