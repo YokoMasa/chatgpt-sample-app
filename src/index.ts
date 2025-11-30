@@ -8,6 +8,8 @@ import MyPageController from "./controller/MyPageController.js";
 import NotFoundController from "./controller/NotFoundController.js";
 import LoginController from "./controller/LoginController.js";
 import { LRUCacheSessionStore } from "./auth/LRUCacheSessionStore.js";
+import LogoutController from "./controller/LogoutController.js";
+import MCPOAuthASController from "./controller/MCPOAuthASController.js";
 
 declare module 'express-session' {
   interface SessionData {
@@ -36,8 +38,10 @@ expressApp.use(session({
 
 // controllers
 expressApp.use("/login", LoginController);
+expressApp.use("/logout", LogoutController);
 expressApp.use("/mypage", MyPageController);
 expressApp.use("/", MyPageController);
+expressApp.use(MCPOAuthASController);
 
 const mcpServer = new McpServer({
   name: 'example-server',
