@@ -77,10 +77,7 @@ export class PKCEVerifier {
     const sha256 = createHash("sha256");
     sha256.update(codeVerifier, "ascii");
     const base64Encoded = sha256.digest().toString("base64url");
-    return base64Encoded
-      .replaceAll(/\+/g, "-")
-      .replaceAll(/\//g, "_")
-      .replaceAll(/=/g, "");
+    return base64Encoded.replaceAll(/=/g, "");
 
   }
 
