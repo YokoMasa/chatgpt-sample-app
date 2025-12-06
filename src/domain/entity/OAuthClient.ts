@@ -11,7 +11,7 @@ export class OAuthClient {
   private name: string;
   private clientUri: URL | undefined;
   private logoUri: URL | undefined;
-  private scopes: Scope[];
+  private scopes: Set<Scope>;
   private contacts: string[];
   private termsOfServiceUri: URL | undefined;
   private privacyPolicyUri: URL | undefined;
@@ -54,7 +54,7 @@ export class OAuthClient {
     if (scopes != null && scopes.length === 0) {
       throw new DomainError("scope must be specified.");
     }
-    this.scopes = scopes != null ? scopes : [Scope.MCP_DEFAULT];
+    this.scopes = new Set(scopes != null ? scopes : [Scope.MCP_DEFAULT]);
     this.contacts = contacts != null ? contacts : [];
     this.termsOfServiceUri = termsOfServiceUri;
     this.privacyPolicyUri = privacyPolicyUri;
@@ -103,6 +103,14 @@ export class OAuthClient {
 
   public getScopes() {
     return this.scopes.values();
+  }
+
+  public hasScope(scopeStr: string) {
+    return this.scopes.has(Scope.fromString(scopeStr));
+  }
+
+  public hasScopes(scopeStrs: string[]) {
+    return scopeStrs.every(this.hasScope);
   }
 
   public getContacts() {

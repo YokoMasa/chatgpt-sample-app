@@ -27,14 +27,7 @@ export class OAuthGrantRepository {
     }
     innerMap.set(grant.getClientId(), grant);
 
-    if (grant.isCodeAlreadyExchanged()) {
-      this.codeIndex.delete(grant.getAuthorizationCode());
-    } else if (this.codeIndex.has(grant.getAuthorizationCode())) {
-      console.error("code collided.");
-      throw new Error("Unexpected Error Occurred");
-    } else {
-      this.codeIndex.set(grant.getAuthorizationCode(), grant);
-    }
+    this.codeIndex.set(grant.getAuthorizationCode(), grant);
   }
 
   public findByUserIdAndClientId(userId: string, clientId: string) {
@@ -47,5 +40,13 @@ export class OAuthGrantRepository {
 
   public findByAuthorizationCode(code: string) {
     return this.codeIndex.get(code);
+  }
+
+  public delete(grant: OAuthGrant) {
+    const innerMap = this.index.get(grant.getUserId());
+    if (innerMap != null) {
+      innerMap.delete(grant.getClientId());
+    }
+    this.codeIndex.delete(grant.getAuthorizationCode());
   }
 }

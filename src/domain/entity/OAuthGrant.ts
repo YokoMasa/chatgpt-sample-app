@@ -1,5 +1,4 @@
 import { getRandomValues } from "crypto";
-import type { PKCEVerifier } from "../../utils/PKCEVerifier.js";
 import { Scope } from "../vo/Scope.js";
 import type { OAuthClient } from "./OAuthClient.js";
 

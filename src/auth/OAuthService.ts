@@ -7,6 +7,8 @@ import { OAuthClientRepository } from "../domain/repository/OAuthClientRepositor
 import { OAuthGrantRepository } from "../domain/repository/OAuthGrantRepository.js";
 import { OAuthClient } from "../domain/entity/OAuthClient.js";
 import { Scope } from "../domain/vo/Scope.js";
+import { OAuthGrant } from "../domain/entity/OAuthGrant.js";
+import { InvalidClientError, InvalidGrantError, InvalidRequestError, InvalidScopeError, UnsupportedGrantTypeError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
 
 const clientRepo = OAuthClientRepository.getInstance();
 const grantRepo = OAuthGrantRepository.getInstance();
@@ -14,6 +16,7 @@ const grantRepo = OAuthGrantRepository.getInstance();
 function mapClientToSDKForm(client: OAuthClient): OAuthClientInformationFull {
   return {
     client_id: client.getId(),
+    client_secret: client.getSecret(),
     redirect_uris: [...client.getRedirectUri().map(uri => uri.toString())],
     token_endpoint_auth_method: "client_secret_post",
     grant_types: ["authorization_code"],
@@ -45,7 +48,7 @@ export const OAuthClientStore: OAuthRegisteredClientsStore = {
       name: args.client_name,
       clientUri: args.client_uri != null ? new URL(args.client_uri) : undefined,
       logoUri: args.logo_uri != null ? new URL(args.logo_uri) : undefined,
-      scopes: args.scope != null ? args.scope.split(",").map(Scope.fromString) : undefined,
+      scopes: args.scope != null ? args.scope.split(" ").map(Scope.fromString) : undefined,
       contacts: args.contacts,
       termsOfServiceUri: args.tos_uri != null ? new URL(args.tos_uri) : undefined,
       privacyPolicyUri: args.policy_uri != null ? new URL(args.policy_uri) : undefined,
@@ -64,37 +67,85 @@ export class OAuthService implements OAuthServerProvider {
   }
 
   public async authorize(
-    client: OAuthClientInformationFull,
+    { client_id }: OAuthClientInformationFull,
     params: AuthorizationParams,
     res: Response
   ) {
-    throw new Error("Method not implemented.");
+    const client = clientRepo.findById(client_id);
+    if (client == null) {
+      throw new InvalidClientError("Client not found.");
+    }
+    if (params.scopes != null && !client.hasScopes(params.scopes)) {
+      throw new InvalidScopeError("Invalid scope.");
+    }
+
+    const userId = res.req.session.userId;
+    if (userId == null) {
+      throw new InvalidRequestError("Unauthenticated.");
+    }
+
+    const grant = OAuthGrant.createNew({
+      client,
+      codeChallenge: params.codeChallenge,
+      scopes: params.scopes != null ? params.scopes.map(Scope.fromString) : [],
+      userId
+    });
+    grantRepo.save(grant);
+
+    const redirectParams = new URLSearchParams();
+    redirectParams.set("code", grant.getAuthorizationCode());
+    params.state != null && redirectParams.set("state", params.state);
+
+    const redirectUrl = `${params.redirectUri}?${redirectParams.toString()}`;
+    res.redirect(redirectUrl);
   }
 
   public async challengeForAuthorizationCode(
-    client: OAuthClientInformationFull,
+    { client_id }: OAuthClientInformationFull,
     authorizationCode: string
   ): Promise<string> {
-    throw new Error("Method not implemented.");
+    const grant = grantRepo.findByAuthorizationCode(authorizationCode);
+    if (grant == null || grant.getClientId() !== client_id) {
+      throw new InvalidGrantError("Invalid grant.");
+    }
+    return grant.getCodeChallenge();
   }
 
   public async exchangeAuthorizationCode(
-    client: OAuthClientInformationFull,
+    { client_id }: OAuthClientInformationFull,
     authorizationCode: string,
-    codeVerifier?: string,
-    redirectUri?: string,
-    resource?: URL
+    _codeVerifier?: string,
+    _redirectUri?: string,
+    _resource?: URL
   ): Promise<OAuthTokens> {
-    throw new Error("Method not implemented.");
+    const grant = grantRepo.findByAuthorizationCode(authorizationCode);
+    if (
+      grant == null
+      || grant.getClientId() !== client_id
+      || grant.isCodeExpired()
+    ) {
+      throw new InvalidGrantError("Invalid grant.");
+    }
+
+    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#name-reuse-of-authorization-code
+    if (grant.isCodeAlreadyExchanged()) {
+      grantRepo.delete(grant);
+      throw new InvalidGrantError("This code is already used. Revoking existing token.");
+    }
+
+    return {
+      access_token: "TOKEN",
+      token_type: "Bearer"
+    }
   }
 
   public async exchangeRefreshToken(
-    client: OAuthClientInformationFull,
-    refreshToken: string,
-    scopes?: string[],
-    resource?: URL
+    _client: OAuthClientInformationFull,
+    _refreshToken: string,
+    _scopes?: string[],
+    _resource?: URL
   ): Promise<OAuthTokens> {
-    throw new Error("Method not implemented.");
+    throw new UnsupportedGrantTypeError("refresh_token is not supported.");
   }
 
   public async verifyAccessToken(token: string): Promise<AuthInfo> {

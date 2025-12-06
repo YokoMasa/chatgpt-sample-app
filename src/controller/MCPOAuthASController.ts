@@ -3,8 +3,11 @@ import { clientRegistrationHandler } from "@modelcontextprotocol/sdk/server/auth
 import SessionCheckMiddleware from "../auth/SessionCheckMiddleware.js";
 import { authorizationHandler } from "@modelcontextprotocol/sdk/server/auth/handlers/authorize.js";
 import { OAuthClientStore, OAuthService } from "../auth/OAuthService.js";
+import { tokenHandler } from "@modelcontextprotocol/sdk/server/auth/handlers/token.js";
+import { authenticateClient } from "@modelcontextprotocol/sdk/server/auth/middleware/clientAuth.js";
 
 const controller = Router();
+const oAuthService = new OAuthService();
 
 // DCR Endpoint
 controller.use(
@@ -52,8 +55,16 @@ controller.use(
   "/oauth/do_authorize",
   SessionCheckMiddleware,
   authorizationHandler({
-    provider: new OAuthService()
+    provider: oAuthService
   }
 ));
+
+// Token Endpoint
+controller.use(
+  "/oauth/token",
+  tokenHandler({
+    provider: oAuthService
+  })
+);
 
 export default controller;
