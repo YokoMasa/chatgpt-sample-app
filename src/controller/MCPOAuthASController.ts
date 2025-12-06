@@ -1,58 +1,59 @@
-import { mcpAuthRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
-import { OAuthClientRepository } from "../domain/repository/OAuthClientRepository.js";
-import { OAuthClient } from "../domain/entity/OAuthClient.js";
-import type { OAuthClientInformationFull } from "@modelcontextprotocol/sdk/shared/auth.js";
-import { Scope } from "../domain/vo/Scope.js";
+import { Router } from "express";
+import { clientRegistrationHandler } from "@modelcontextprotocol/sdk/server/auth/handlers/register.js";
+import SessionCheckMiddleware from "../auth/SessionCheckMiddleware.js";
+import { authorizationHandler } from "@modelcontextprotocol/sdk/server/auth/handlers/authorize.js";
+import { OAuthClientStore, OAuthService } from "../auth/OAuthService.js";
 
-function mapClientToSDKForm(client: OAuthClient): OAuthClientInformationFull {
-  return {
-    client_id: client.getId(),
-    redirect_uris: [...client.getRedirectUri().map(uri => uri.toString())],
-    token_endpoint_auth_method: "client_secret_post",
-    grant_types: ["authorization_code"],
-    response_types: ["code"],
-    client_name: client.getName(),
-    client_uri: client.getClientUri()?.toString(),
-    logo_uri: client.getLogoUri()?.toString(),
-    scope: [...client.getScopes()].join(","),
-    contacts: [...client.getContacts()],
-    tos_uri: client.getTermsOfServiceUri()?.toString(),
-    policy_uri: client.getPrivacyPolicyUri()?.toString(),
-    software_id: client.getSoftwareId(),
-    software_version: client.getSoftwareVersion()
-  };
-}
+const controller = Router();
 
-const repo = OAuthClientRepository.getInstance();
+// DCR Endpoint
+controller.use(
+  "/oauth/client",
+  clientRegistrationHandler({
+    clientsStore: OAuthClientStore,
+    clientSecretExpirySeconds: 0,
+    clientIdGeneration: false
+  }
+));
 
-export default mcpAuthRouter({
-  issuerUrl: new URL("https://test.com"),
-  provider: {
-    clientsStore: {
-      getClient: clientId => {
-        const client = repo.findById(clientId);
-        if (client == null) {
-          return undefined;
-        }
-
-        return mapClientToSDKForm(client);
-      },
-      registerClient: args => {
-        const client = new OAuthClient({
-          redirectUris: args.redirect_uris.map(uriStr => new URL(uriStr)),
-          name: args.client_name,
-          clientUri: args.client_uri != null ? new URL(args.client_uri) : undefined,
-          logoUri: args.logo_uri != null ? new URL(args.logo_uri) : undefined,
-          scopes: args.scope != null ? args.scope.split(",").map(Scope.fromString) : undefined,
-          contacts: args.contacts,
-          termsOfServiceUri: args.tos_uri != null ? new URL(args.tos_uri) : undefined,
-          privacyPolicyUri: args.policy_uri != null ? new URL(args.policy_uri) : undefined,
-          softwareId: args.software_id,
-          softwareVersion: args.software_version
+// Authorization Endpoint (shows consent screen)
+controller.use(
+  "/oauth/authorize",
+  SessionCheckMiddleware,
+  authorizationHandler({
+    provider: {
+      clientsStore: OAuthClientStore,
+      authorize: async (client, params, res) => {
+        console.log("/oauth/authorize");
+        res.render("authorize", {
+          clientName: client.client_name ?? client.client_id,
+          scopes: client.scope != null ? client.scope.split(" ") : [],
+          redirectUrl: params.redirectUri
         });
-        repo.save(client);
-        return mapClientToSDKForm(client);
+      },
+      challengeForAuthorizationCode: async (_client, _authorizationCode) => {
+        throw new Error("Function not implemented.");
+      },
+      exchangeAuthorizationCode: async (_client, _authorizationCode, _codeVerifier, _redirectUri, _resource) => {
+        throw new Error("Function not implemented.");
+      },
+      exchangeRefreshToken: async (_client, _refreshToken, _scopes, _resource) => {
+        throw new Error("Function not implemented.");
+      },
+      verifyAccessToken: async _token => {
+        throw new Error("Function not implemented.");
       }
     }
+  })
+);
+
+// Authorization Endpoint (performs redirect)
+controller.use(
+  "/oauth/do_authorize",
+  SessionCheckMiddleware,
+  authorizationHandler({
+    provider: new OAuthService()
   }
-});
+));
+
+export default controller;

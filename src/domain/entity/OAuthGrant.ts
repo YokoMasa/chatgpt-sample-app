@@ -11,25 +11,25 @@ export class OAuthGrant {
   private createdAt: Date;
   private authorizationCode: string;
   private authorizationCodeExchanged: boolean;
-  private pkceVerifier: PKCEVerifier;
+  private codeChallenge: string;
   private scopes: Scope[];
 
   constructor({
     clientId,
     userId,
-    pkceVerifier,
+    codeChallenge,
     scopes
   }: {
     clientId: string;
     userId: string;
-    pkceVerifier: PKCEVerifier;
+    codeChallenge: string;
     scopes: Scope[];
   }) {
     this.clientId = clientId;
     this.userId = userId;
     this.createdAt = new Date();
     this.authorizationCodeExchanged = false;
-    this.pkceVerifier = pkceVerifier;
+    this.codeChallenge = codeChallenge;
     this.scopes = scopes;
 
     const randomBytes = Buffer.alloc(96);
@@ -40,18 +40,18 @@ export class OAuthGrant {
   public static createNew({
     client,
     userId,
-    pkceVerifier,
+    codeChallenge,
     scopes
   }: {
     client: OAuthClient;
     userId: string;
-    pkceVerifier: PKCEVerifier;
+    codeChallenge: string;
     scopes?: Scope[];
   }): OAuthGrant {
     return new OAuthGrant({
       clientId: client.getId(),
       userId,
-      pkceVerifier,
+      codeChallenge,
       scopes: scopes ?? [Scope.MCP_DEFAULT]
     });
   }
@@ -68,8 +68,8 @@ export class OAuthGrant {
     return this.authorizationCode;
   }
 
-  public getPKCEVerifier() {
-    return this.pkceVerifier;
+  public getCodeChallenge() {
+    return this.codeChallenge;
   }
 
   public getScopes() {

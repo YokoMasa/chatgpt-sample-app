@@ -1,4 +1,4 @@
-import type { OAuthGrant } from "../entity/OAuthGrant.js";
+import { OAuthGrant } from "../entity/OAuthGrant.js";
 
 export class OAuthGrantRepository {
 
@@ -12,9 +12,11 @@ export class OAuthGrantRepository {
   }
 
   private index: Map<string, Map<string, OAuthGrant>>;
+  private codeIndex: Map<string, OAuthGrant>;
 
   constructor() {
-    this.index = new Map<string, Map<string, OAuthGrant>>;
+    this.index = new Map<string, Map<string, OAuthGrant>>();
+    this.codeIndex = new Map<string, OAuthGrant>();
   }
 
   public save(grant: OAuthGrant) {
@@ -23,8 +25,16 @@ export class OAuthGrantRepository {
       innerMap = new Map<string, OAuthGrant>();
       this.index.set(grant.getUserId(), innerMap);
     }
-
     innerMap.set(grant.getClientId(), grant);
+
+    if (grant.isCodeAlreadyExchanged()) {
+      this.codeIndex.delete(grant.getAuthorizationCode());
+    } else if (this.codeIndex.has(grant.getAuthorizationCode())) {
+      console.error("code collided.");
+      throw new Error("Unexpected Error Occurred");
+    } else {
+      this.codeIndex.set(grant.getAuthorizationCode(), grant);
+    }
   }
 
   public findByUserIdAndClientId(userId: string, clientId: string) {
@@ -33,5 +43,9 @@ export class OAuthGrantRepository {
       return innerMap.get(clientId);
     }
     return undefined;
+  }
+
+  public findByAuthorizationCode(code: string) {
+    return this.codeIndex.get(code);
   }
 }

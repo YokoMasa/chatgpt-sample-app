@@ -40,8 +40,8 @@ expressApp.use(session({
 expressApp.use("/login", LoginController);
 expressApp.use("/logout", LogoutController);
 expressApp.use("/mypage", MyPageController);
-expressApp.use("/", MyPageController);
 expressApp.use(MCPOAuthASController);
+expressApp.use("/", MyPageController);
 
 const mcpServer = new McpServer({
   name: 'example-server',
