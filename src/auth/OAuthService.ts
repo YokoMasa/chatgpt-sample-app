@@ -9,8 +9,11 @@ import { OAuthClient } from "../domain/entity/OAuthClient.js";
 import { Scope } from "../domain/vo/Scope.js";
 import { OAuthGrant } from "../domain/entity/OAuthGrant.js";
 import { InvalidClientError, InvalidGrantError, InvalidRequestError, InvalidScopeError, UnsupportedGrantTypeError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
+import { OAuthSessionRepository } from "../domain/repository/OAuthSessionRepository.js";
+import { OAuthSession } from "../domain/entity/OAuthSession.js";
 
 const clientRepo = OAuthClientRepository.getInstance();
+const sessionRepo = OAuthSessionRepository.getInstance();
 const grantRepo = OAuthGrantRepository.getInstance();
 
 function mapClientToSDKForm(client: OAuthClient): OAuthClientInformationFull {
@@ -84,16 +87,16 @@ export class OAuthService implements OAuthServerProvider {
       throw new InvalidRequestError("Unauthenticated.");
     }
 
-    const grant = OAuthGrant.createNew({
+    const oAuthSession = new OAuthSession({
       client,
-      codeChallenge: params.codeChallenge,
-      scopes: params.scopes != null ? params.scopes.map(Scope.fromString) : [],
-      userId
+      userId,
+      requestedScopes: params.scopes != null ? params.scopes.map(Scope.fromString) : [Scope.MCP_DEFAULT],
+      codeChallenge: params.codeChallenge
     });
-    grantRepo.save(grant);
+    sessionRepo.save(oAuthSession);
 
     const redirectParams = new URLSearchParams();
-    redirectParams.set("code", grant.getAuthorizationCode());
+    redirectParams.set("code", oAuthSession.getAuthorizationCode());
     params.state != null && redirectParams.set("state", params.state);
 
     const redirectUrl = `${params.redirectUri}?${redirectParams.toString()}`;
@@ -104,11 +107,11 @@ export class OAuthService implements OAuthServerProvider {
     { client_id }: OAuthClientInformationFull,
     authorizationCode: string
   ): Promise<string> {
-    const grant = grantRepo.findByAuthorizationCode(authorizationCode);
-    if (grant == null || grant.getClientId() !== client_id) {
+    const oAuthSession = sessionRepo.findByCode(authorizationCode);
+    if (oAuthSession == null || oAuthSession.getClientId() !== client_id) {
       throw new InvalidGrantError("Invalid grant.");
     }
-    return grant.getCodeChallenge();
+    return oAuthSession.getCodeChallenge();
   }
 
   public async exchangeAuthorizationCode(
@@ -118,20 +121,25 @@ export class OAuthService implements OAuthServerProvider {
     _redirectUri?: string,
     _resource?: URL
   ): Promise<OAuthTokens> {
-    const grant = grantRepo.findByAuthorizationCode(authorizationCode);
+    const oAuthSession = sessionRepo.findByCode(authorizationCode);
     if (
-      grant == null
-      || grant.getClientId() !== client_id
-      || grant.isCodeExpired()
+      oAuthSession == null
+      || oAuthSession.getClientId() !== client_id
+      || oAuthSession.isExpired()
     ) {
       throw new InvalidGrantError("Invalid grant.");
     }
 
     // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#name-reuse-of-authorization-code
-    if (grant.isCodeAlreadyExchanged()) {
-      grantRepo.delete(grant);
+    const existingGrant = oAuthSession.getGrant();
+    if (existingGrant != null) {
+      sessionRepo.delete(oAuthSession);
+      grantRepo.delete(existingGrant);
       throw new InvalidGrantError("This code is already used. Revoking existing token.");
     }
+
+    const grant = OAuthGrant.fromSession(oAuthSession);
+    grantRepo.save(grant);
 
     return {
       access_token: "TOKEN",

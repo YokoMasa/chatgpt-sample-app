@@ -11,42 +11,36 @@ export class OAuthGrantRepository {
     return this.instance;
   }
 
-  private index: Map<string, Map<string, OAuthGrant>>;
-  private codeIndex: Map<string, OAuthGrant>;
+  private idIndex = new Map<string, OAuthGrant>();
+  private userAndClientIndex = new Map<string, OAuthGrant>();
 
   constructor() {
-    this.index = new Map<string, Map<string, OAuthGrant>>();
-    this.codeIndex = new Map<string, OAuthGrant>();
+    this.idIndex = new Map<string, OAuthGrant>();
+    this.userAndClientIndex = new Map<string, OAuthGrant>();
   }
 
   public save(grant: OAuthGrant) {
-    let innerMap = this.index.get(grant.getUserId());
-    if (innerMap == null) {
-      innerMap = new Map<string, OAuthGrant>();
-      this.index.set(grant.getUserId(), innerMap);
+    const userAndClientKey = this.getUserAndClientKey(grant);
+    const existingGrant = this.userAndClientIndex.get(userAndClientKey);
+    if (existingGrant != null && existingGrant !== grant) {
+      throw new Error("Grant for this userId and clientId pair already exists.");
     }
-    innerMap.set(grant.getClientId(), grant);
 
-    this.codeIndex.set(grant.getAuthorizationCode(), grant);
+    this.idIndex.set(grant.getId(), grant);
+    this.userAndClientIndex.set(userAndClientKey, grant);
   }
 
-  public findByUserIdAndClientId(userId: string, clientId: string) {
-    const innerMap = this.index.get(userId);
-    if (innerMap != null) {
-      return innerMap.get(clientId);
-    }
-    return undefined;
-  }
-
-  public findByAuthorizationCode(code: string) {
-    return this.codeIndex.get(code);
+  public findById(id: string) {
+    return this.idIndex.get(id);
   }
 
   public delete(grant: OAuthGrant) {
-    const innerMap = this.index.get(grant.getUserId());
-    if (innerMap != null) {
-      innerMap.delete(grant.getClientId());
-    }
-    this.codeIndex.delete(grant.getAuthorizationCode());
+    const userAndClientKey = this.getUserAndClientKey(grant);
+    this.idIndex.delete(grant.getId());
+    this.userAndClientIndex.delete(userAndClientKey);
+  }
+
+  private getUserAndClientKey(grant: OAuthGrant) {
+    return grant.getClientId() + "_" + grant.getUserId();
   }
 }

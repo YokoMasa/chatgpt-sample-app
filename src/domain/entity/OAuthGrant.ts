@@ -1,58 +1,42 @@
-import { getRandomValues } from "crypto";
+import { randomUUID } from "crypto";
 import { Scope } from "../vo/Scope.js";
-import type { OAuthClient } from "./OAuthClient.js";
+import type { OAuthSession } from "./OAuthSession.js";
 
-const tenMinutesMillis = 1000 * 60 * 10;
+const fourHoursMillis = 1000 * 60 * 60 * 4;
 
 export class OAuthGrant {
+  private id: string;
   private clientId: string;
   private userId: string;
-  private createdAt: Date;
-  private authorizationCode: string;
-  private authorizationCodeExchanged: boolean;
-  private codeChallenge: string;
+  private expiresAt: Date;
   private scopes: Scope[];
 
   constructor({
     clientId,
     userId,
-    codeChallenge,
     scopes
   }: {
     clientId: string;
     userId: string;
-    codeChallenge: string;
     scopes: Scope[];
   }) {
+    this.id = randomUUID();
     this.clientId = clientId;
     this.userId = userId;
-    this.createdAt = new Date();
-    this.authorizationCodeExchanged = false;
-    this.codeChallenge = codeChallenge;
+    this.expiresAt = new Date(Date.now() + fourHoursMillis);
     this.scopes = scopes;
-
-    const randomBytes = Buffer.alloc(96);
-    getRandomValues(randomBytes);
-    this.authorizationCode = randomBytes.toString("base64url").replace(/=/g, "");
   }
 
-  public static createNew({
-    client,
-    userId,
-    codeChallenge,
-    scopes
-  }: {
-    client: OAuthClient;
-    userId: string;
-    codeChallenge: string;
-    scopes?: Scope[];
-  }): OAuthGrant {
+  public static fromSession(session: OAuthSession) {
     return new OAuthGrant({
-      clientId: client.getId(),
-      userId,
-      codeChallenge,
-      scopes: scopes ?? [Scope.MCP_DEFAULT]
+      clientId: session.getClientId(),
+      userId: session.getUserId(),
+      scopes: session.getRequestedScopes()
     });
+  }
+
+  public getId() {
+    return this.id;
   }
 
   public getClientId() {
@@ -63,32 +47,16 @@ export class OAuthGrant {
     return this.userId;
   }
 
-  public getAuthorizationCode() {
-    return this.authorizationCode;
-  }
-
-  public getCodeChallenge() {
-    return this.codeChallenge;
-  }
-
   public getScopes() {
     return this.scopes.values();
   }
 
-  public isCodeAlreadyExchanged() {
-    return this.authorizationCodeExchanged;
+  public hasScope(scope: Scope) {
+    return this.scopes.some(s => s === scope);
   }
 
-  public isCodeExpired() {
-    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#name-authorization-response
-    return (this.createdAt.getTime() + tenMinutesMillis) < Date.now();
+  public isExpired() {
+    return this.expiresAt.getTime() < Date.now();
   }
 
-  public markCodeAsExchanged() {
-    if (this.authorizationCodeExchanged) {
-      throw new Error("The code is already marked as exchanged! Something is wrong.");
-    }
-    this.authorizationCodeExchanged = true;
-  }
-  
 }
