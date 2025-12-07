@@ -5,68 +5,59 @@ import type { OAuthClientInformationFull, OAuthTokens } from "@modelcontextproto
 import type { Response } from "express";
 import { OAuthClientRepository } from "../domain/repository/OAuthClientRepository.js";
 import { OAuthGrantRepository } from "../domain/repository/OAuthGrantRepository.js";
-import { OAuthClient } from "../domain/entity/OAuthClient.js";
 import { Scope } from "../domain/vo/Scope.js";
 import { OAuthGrant } from "../domain/entity/OAuthGrant.js";
-import { InvalidClientError, InvalidGrantError, InvalidRequestError, InvalidScopeError, UnsupportedGrantTypeError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
+import { InvalidClientError, InvalidGrantError, InvalidRequestError, InvalidScopeError, InvalidTokenError, UnsupportedGrantTypeError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
 import { OAuthSessionRepository } from "../domain/repository/OAuthSessionRepository.js";
 import { OAuthSession } from "../domain/entity/OAuthSession.js";
-
-const clientRepo = OAuthClientRepository.getInstance();
-const sessionRepo = OAuthSessionRepository.getInstance();
-const grantRepo = OAuthGrantRepository.getInstance();
-
-function mapClientToSDKForm(client: OAuthClient): OAuthClientInformationFull {
-  return {
-    client_id: client.getId(),
-    client_secret: client.getSecret(),
-    redirect_uris: [...client.getRedirectUri().map(uri => uri.toString())],
-    token_endpoint_auth_method: "client_secret_post",
-    grant_types: ["authorization_code"],
-    response_types: ["code"],
-    client_name: client.getName(),
-    client_uri: client.getClientUri()?.toString(),
-    logo_uri: client.getLogoUri()?.toString(),
-    scope: [...client.getScopes()].join(","),
-    contacts: [...client.getContacts()],
-    tos_uri: client.getTermsOfServiceUri()?.toString(),
-    policy_uri: client.getPrivacyPolicyUri()?.toString(),
-    software_id: client.getSoftwareId(),
-    software_version: client.getSoftwareVersion()
-  };
-}
-
-export const OAuthClientStore: OAuthRegisteredClientsStore = {
-  getClient: clientId => {
-    const client = clientRepo.findById(clientId);
-    if (client == null) {
-      return undefined;
-    }
-
-    return mapClientToSDKForm(client);
-  },
-  registerClient: args => {
-    const client = new OAuthClient({
-      redirectUris: args.redirect_uris.map(uriStr => new URL(uriStr)),
-      name: args.client_name,
-      clientUri: args.client_uri != null ? new URL(args.client_uri) : undefined,
-      logoUri: args.logo_uri != null ? new URL(args.logo_uri) : undefined,
-      scopes: args.scope != null ? args.scope.split(" ").map(Scope.fromString) : undefined,
-      contacts: args.contacts,
-      termsOfServiceUri: args.tos_uri != null ? new URL(args.tos_uri) : undefined,
-      privacyPolicyUri: args.policy_uri != null ? new URL(args.policy_uri) : undefined,
-      softwareId: args.software_id,
-      softwareVersion: args.software_version
-    });
-    clientRepo.save(client);
-    return mapClientToSDKForm(client);
-  }
-}
+import type { AccessTokenService } from "./AccessTokenService.js";
+import { OAuthClientStore } from "./OAuthClientStore.js";
 
 export class OAuthService implements OAuthServerProvider {
 
+  private static instance: OAuthService;
+
+  public static init(
+    accessTokenService: AccessTokenService,
+    clientRepo: OAuthClientRepository,
+    sessionRepo: OAuthSessionRepository,
+    grantRepo: OAuthGrantRepository,
+    clientStore: OAuthClientStore
+  ) {
+    if (this.instance == null) {
+      this.instance = new OAuthService(accessTokenService, clientRepo, sessionRepo, grantRepo, clientStore);
+    }
+  }
+
+  public static getInstance() {
+    if (this.instance == null) {
+      throw new Error("Call init() first!");
+    }
+    return this.instance;
+  }
+
+  private accessTokenService: AccessTokenService;
+  private clientRepo: OAuthClientRepository;
+  private sessionRepo: OAuthSessionRepository;
+  private grantRepo: OAuthGrantRepository;
+  private clientStore: OAuthClientStore;
+
+  private constructor(
+    accessTokenService: AccessTokenService,
+    clientRepo: OAuthClientRepository,
+    sessionRepo: OAuthSessionRepository,
+    grantRepo: OAuthGrantRepository,
+    clientStore: OAuthClientStore
+  ) {
+    this.clientRepo = clientRepo;
+    this.sessionRepo = sessionRepo;
+    this.grantRepo = grantRepo;
+    this.accessTokenService = accessTokenService;
+    this.clientStore = clientStore
+  }
+
   get clientsStore(): OAuthRegisteredClientsStore {
-    return OAuthClientStore;
+    return this.clientStore;
   }
 
   public async authorize(
@@ -74,7 +65,7 @@ export class OAuthService implements OAuthServerProvider {
     params: AuthorizationParams,
     res: Response
   ) {
-    const client = clientRepo.findById(client_id);
+    const client = this.clientRepo.findById(client_id);
     if (client == null) {
       throw new InvalidClientError("Client not found.");
     }
@@ -93,7 +84,7 @@ export class OAuthService implements OAuthServerProvider {
       requestedScopes: params.scopes != null ? params.scopes.map(Scope.fromString) : [Scope.MCP_DEFAULT],
       codeChallenge: params.codeChallenge
     });
-    sessionRepo.save(oAuthSession);
+    this.sessionRepo.save(oAuthSession);
 
     const redirectParams = new URLSearchParams();
     redirectParams.set("code", oAuthSession.getAuthorizationCode());
@@ -107,7 +98,7 @@ export class OAuthService implements OAuthServerProvider {
     { client_id }: OAuthClientInformationFull,
     authorizationCode: string
   ): Promise<string> {
-    const oAuthSession = sessionRepo.findByCode(authorizationCode);
+    const oAuthSession = this.sessionRepo.findByCode(authorizationCode);
     if (oAuthSession == null || oAuthSession.getClientId() !== client_id) {
       throw new InvalidGrantError("Invalid grant.");
     }
@@ -121,7 +112,7 @@ export class OAuthService implements OAuthServerProvider {
     _redirectUri?: string,
     _resource?: URL
   ): Promise<OAuthTokens> {
-    const oAuthSession = sessionRepo.findByCode(authorizationCode);
+    const oAuthSession = this.sessionRepo.findByCode(authorizationCode);
     if (
       oAuthSession == null
       || oAuthSession.getClientId() !== client_id
@@ -133,16 +124,16 @@ export class OAuthService implements OAuthServerProvider {
     // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#name-reuse-of-authorization-code
     const existingGrant = oAuthSession.getGrant();
     if (existingGrant != null) {
-      sessionRepo.delete(oAuthSession);
-      grantRepo.delete(existingGrant);
+      this.sessionRepo.delete(oAuthSession);
+      this.grantRepo.delete(existingGrant);
       throw new InvalidGrantError("This code is already used. Revoking existing token.");
     }
 
     const grant = OAuthGrant.fromSession(oAuthSession);
-    grantRepo.save(grant);
+    this.grantRepo.save(grant);
 
     return {
-      access_token: "TOKEN",
+      access_token: this.accessTokenService.createToken(grant),
       token_type: "Bearer"
     }
   }
@@ -157,7 +148,25 @@ export class OAuthService implements OAuthServerProvider {
   }
 
   public async verifyAccessToken(token: string): Promise<AuthInfo> {
-    throw new Error("Method not implemented.");
+    const verificationResult = this.accessTokenService.verifyToken(token);
+    if (verificationResult.isSuccess) {
+      const grant = this.grantRepo.findById(verificationResult.payload.grantId);
+      if (grant == null || grant.isExpired()) {
+        throw new InvalidTokenError("Invalid token.");
+      }
+
+      return {
+        token,
+        clientId: grant.getClientId(),
+        scopes: [...grant.getScopes()],
+        expiresAt: grant.getExpiresAt().getTime() / 1000,
+        extra: {
+          userId: grant.getUserId()
+        }
+      }
+    } else {
+      throw new InvalidTokenError("Invalid token.");
+    }
   }
 
 }

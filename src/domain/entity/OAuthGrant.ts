@@ -59,4 +59,8 @@ export class OAuthGrant {
     return this.expiresAt.getTime() < Date.now();
   }
 
+  public getExpiresAt() {
+    return this.expiresAt;
+  }
+
 }

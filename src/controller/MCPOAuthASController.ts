@@ -2,18 +2,17 @@ import { Router } from "express";
 import { clientRegistrationHandler } from "@modelcontextprotocol/sdk/server/auth/handlers/register.js";
 import SessionCheckMiddleware from "../auth/SessionCheckMiddleware.js";
 import { authorizationHandler } from "@modelcontextprotocol/sdk/server/auth/handlers/authorize.js";
-import { OAuthClientStore, OAuthService } from "../auth/OAuthService.js";
+import { OAuthService } from "../auth/OAuthService.js";
 import { tokenHandler } from "@modelcontextprotocol/sdk/server/auth/handlers/token.js";
-import { authenticateClient } from "@modelcontextprotocol/sdk/server/auth/middleware/clientAuth.js";
+import { OAuthClientStore } from "../auth/OAuthClientStore.js";
 
 const controller = Router();
-const oAuthService = new OAuthService();
 
 // DCR Endpoint
 controller.use(
   "/oauth/client",
   clientRegistrationHandler({
-    clientsStore: OAuthClientStore,
+    clientsStore: OAuthClientStore.getInstance(),
     clientSecretExpirySeconds: 0,
     clientIdGeneration: false
   }
@@ -25,9 +24,8 @@ controller.use(
   SessionCheckMiddleware,
   authorizationHandler({
     provider: {
-      clientsStore: OAuthClientStore,
+      clientsStore: OAuthClientStore.getInstance(),
       authorize: async (client, params, res) => {
-        console.log("/oauth/authorize");
         res.render("authorize", {
           clientName: client.client_name ?? client.client_id,
           scopes: client.scope != null ? client.scope.split(" ") : [],
@@ -55,7 +53,7 @@ controller.use(
   "/oauth/do_authorize",
   SessionCheckMiddleware,
   authorizationHandler({
-    provider: oAuthService
+    provider: OAuthService.getInstance()
   }
 ));
 
@@ -63,7 +61,7 @@ controller.use(
 controller.use(
   "/oauth/token",
   tokenHandler({
-    provider: oAuthService
+    provider: OAuthService.getInstance()
   })
 );
 
