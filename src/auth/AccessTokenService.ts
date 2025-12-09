@@ -1,4 +1,4 @@
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import type { OAuthGrant } from "../domain/entity/OAuthGrant.js";
 
 export type AccessTokenPayload = {

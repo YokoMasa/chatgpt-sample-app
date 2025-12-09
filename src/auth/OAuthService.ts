@@ -131,6 +131,8 @@ export class OAuthService implements OAuthServerProvider {
 
     const grant = OAuthGrant.fromSession(oAuthSession);
     this.grantRepo.save(grant);
+    oAuthSession.markCodeAsExchanged(grant);
+    this.sessionRepo.save(oAuthSession);
 
     return {
       access_token: this.accessTokenService.createToken(grant),
