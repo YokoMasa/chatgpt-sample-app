@@ -11,6 +11,7 @@ import LoginController from "./controller/LoginController.js";
 import { LRUCacheSessionStore } from "./auth/LRUCacheSessionStore.js";
 import LogoutController from "./controller/LogoutController.js";
 import MCPOAuthASController from "./controller/MCPOAuthASController.js";
+import MCPOAuthRSController from "./controller/MCPOAuthRSController.js";
 
 declare module 'express-session' {
   interface SessionData {
@@ -42,63 +43,8 @@ expressApp.use("/login", LoginController);
 expressApp.use("/logout", LogoutController);
 expressApp.use("/mypage", MyPageController);
 expressApp.use(MCPOAuthASController);
+expressApp.use("/mcp", MCPOAuthRSController);
 expressApp.use("/", MyPageController);
-
-const mcpServer = new McpServer({
-  name: 'example-server',
-  version: '1.0.0'
-});
-
-// Set up your tools, resources, and prompts
-mcpServer.registerTool(
-  'echo',
-  {
-    title: 'Echo Tool',
-    description: 'Echoes back the provided message',
-    inputSchema: { message: z.string() },
-    outputSchema: { echo: z.string() }
-  },
-  async ({ message }) => {
-    const output = { echo: `Tool echo: ${message}` };
-    return {
-      content: [{ type: 'text', text: JSON.stringify(output) }],
-      structuredContent: output
-    };
-  }
-);
-
-expressApp.post('/mcp', async (req, res) => {
-  // In stateless mode, create a new transport for each request to prevent
-  // request ID collisions. Different clients may use the same JSON-RPC request IDs,
-  // which would cause responses to be routed to the wrong HTTP connections if
-  // the transport state is shared.
-  
-  try {
-    const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: undefined,
-      enableJsonResponse: true
-    });
-    
-    res.on('close', () => {
-      transport.close();
-    });
-    
-    await mcpServer.connect(transport);
-    await transport.handleRequest(req, res, req.body);
-  } catch (error) {
-    console.error('Error handling MCP request:', error);
-    if (!res.headersSent) {
-      res.status(500).json({
-        jsonrpc: '2.0',
-        error: {
-          code: -32603,
-          message: 'Internal server error'
-        },
-        id: null
-      });
-    }
-  }
-});
 
 // Not Found Page
 expressApp.all(/.*/, NotFoundController);
