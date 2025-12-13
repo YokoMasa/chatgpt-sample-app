@@ -7,9 +7,10 @@ import NotFoundController from "./controller/NotFoundController.js";
 import LoginController from "./controller/LoginController.js";
 import { LRUCacheSessionStore } from "./auth/LRUCacheSessionStore.js";
 import LogoutController from "./controller/LogoutController.js";
-import MCPOAuthASController from "./controller/MCPOAuthASController.js";
-import MCPOAuthRSController from "./controller/MCPOAuthRSController.js";
+import OAuthASController from "./controller/OAuthASController.js";
+import MCPController from "./controller/MCPController.js";
 import { ENV } from "./utils/Env.js";
+import OAuthMetadataController from "./controller/OAuthMetadataController.js";
 
 declare module 'express-session' {
   interface SessionData {
@@ -38,8 +39,9 @@ expressApp.use(session({
 expressApp.use("/login", LoginController);
 expressApp.use("/logout", LogoutController);
 expressApp.use("/mypage", MyPageController);
-expressApp.use(MCPOAuthASController);
-expressApp.use("/mcp", MCPOAuthRSController);
+expressApp.use(OAuthMetadataController);
+expressApp.use(OAuthASController);
+expressApp.use("/mcp", MCPController);
 expressApp.use("/", MyPageController);
 
 // Not Found Page
