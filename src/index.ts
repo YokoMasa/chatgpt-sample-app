@@ -25,6 +25,7 @@ expressApp.engine("html", handlebarsEngine);
 expressApp.set("view engine", "html");
 expressApp.set("views", "src/view/templates");
 
+expressApp.set("trust proxy", 1);
 expressApp.set("x-powered-by", false);
 expressApp.use(express.json());
 expressApp.use(session({

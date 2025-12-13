@@ -110,7 +110,7 @@ export class OAuthClient {
   }
 
   public hasScopes(scopeStrs: string[]) {
-    return scopeStrs.every(this.hasScope);
+    return scopeStrs.every(scopeStr => this.hasScope(scopeStr));
   }
 
   public getContacts() {

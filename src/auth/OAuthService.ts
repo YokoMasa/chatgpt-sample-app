@@ -65,44 +65,60 @@ export class OAuthService implements OAuthServerProvider {
     params: AuthorizationParams,
     res: Response
   ) {
-    const client = this.clientRepo.findById(client_id);
-    if (client == null) {
-      throw new InvalidClientError("Client not found.");
+    try {
+      const client = this.clientRepo.findById(client_id);
+      if (client == null) {
+        throw new InvalidClientError("Client not found.");
+      }
+      if (params.scopes != null && !client.hasScopes(params.scopes)) {
+        throw new InvalidScopeError("Invalid scope.");
+      }
+
+      const userId = res.req.session.userId;
+      if (userId == null) {
+        throw new InvalidRequestError("Unauthenticated.");
+      }
+
+      const oAuthSession = new OAuthSession({
+        client,
+        userId,
+        requestedScopes: params.scopes != null ? params.scopes.map(Scope.fromString) : [Scope.MCP_DEFAULT],
+        codeChallenge: params.codeChallenge
+      });
+      this.sessionRepo.save(oAuthSession);
+
+      const redirectParams = new URLSearchParams();
+      redirectParams.set("code", oAuthSession.getAuthorizationCode());
+      params.state != null && redirectParams.set("state", params.state);
+
+      const redirectUrl = `${params.redirectUri}?${redirectParams.toString()}`;
+      res.redirect(redirectUrl);
+    } catch (e: any) {
+      console.error(`Error occurred in authorize(). message: ${e.message ?? e.toString()}`);
+      if (e instanceof Error && e.stack != null) {
+        console.error(e.stack);
+      }
+      throw e;
     }
-    if (params.scopes != null && !client.hasScopes(params.scopes)) {
-      throw new InvalidScopeError("Invalid scope.");
-    }
-
-    const userId = res.req.session.userId;
-    if (userId == null) {
-      throw new InvalidRequestError("Unauthenticated.");
-    }
-
-    const oAuthSession = new OAuthSession({
-      client,
-      userId,
-      requestedScopes: params.scopes != null ? params.scopes.map(Scope.fromString) : [Scope.MCP_DEFAULT],
-      codeChallenge: params.codeChallenge
-    });
-    this.sessionRepo.save(oAuthSession);
-
-    const redirectParams = new URLSearchParams();
-    redirectParams.set("code", oAuthSession.getAuthorizationCode());
-    params.state != null && redirectParams.set("state", params.state);
-
-    const redirectUrl = `${params.redirectUri}?${redirectParams.toString()}`;
-    res.redirect(redirectUrl);
   }
 
   public async challengeForAuthorizationCode(
     { client_id }: OAuthClientInformationFull,
     authorizationCode: string
   ): Promise<string> {
-    const oAuthSession = this.sessionRepo.findByCode(authorizationCode);
-    if (oAuthSession == null || oAuthSession.getClientId() !== client_id) {
-      throw new InvalidGrantError("Invalid grant.");
+    try {
+      const oAuthSession = this.sessionRepo.findByCode(authorizationCode);
+      if (oAuthSession == null || oAuthSession.getClientId() !== client_id) {
+        throw new InvalidGrantError("Invalid grant.");
+      }
+      return oAuthSession.getCodeChallenge();
+    } catch (e: any) {
+      console.error(`Error occurred in authorize(). message: ${e.message ?? e.toString()}`);
+      if (e instanceof Error && e.stack != null) {
+        console.error(e.stack);
+      }
+      throw e;
     }
-    return oAuthSession.getCodeChallenge();
   }
 
   public async exchangeAuthorizationCode(
@@ -112,31 +128,39 @@ export class OAuthService implements OAuthServerProvider {
     _redirectUri?: string,
     _resource?: URL
   ): Promise<OAuthTokens> {
-    const oAuthSession = this.sessionRepo.findByCode(authorizationCode);
-    if (
-      oAuthSession == null
-      || oAuthSession.getClientId() !== client_id
-      || oAuthSession.isExpired()
-    ) {
-      throw new InvalidGrantError("Invalid grant.");
-    }
+    try {
+      const oAuthSession = this.sessionRepo.findByCode(authorizationCode);
+      if (
+        oAuthSession == null
+        || oAuthSession.getClientId() !== client_id
+        || oAuthSession.isExpired()
+      ) {
+        throw new InvalidGrantError("Invalid grant.");
+      }
 
-    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#name-reuse-of-authorization-code
-    const existingGrant = oAuthSession.getGrant();
-    if (existingGrant != null) {
-      this.sessionRepo.delete(oAuthSession);
-      this.grantRepo.delete(existingGrant);
-      throw new InvalidGrantError("This code is already used. Revoking existing token.");
-    }
+      // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#name-reuse-of-authorization-code
+      const existingGrant = oAuthSession.getGrant();
+      if (existingGrant != null) {
+        this.sessionRepo.delete(oAuthSession);
+        this.grantRepo.delete(existingGrant);
+        throw new InvalidGrantError("This code is already used. Revoking existing token.");
+      }
 
-    const grant = OAuthGrant.fromSession(oAuthSession);
-    this.grantRepo.save(grant);
-    oAuthSession.markCodeAsExchanged(grant);
-    this.sessionRepo.save(oAuthSession);
+      const grant = OAuthGrant.fromSession(oAuthSession);
+      this.grantRepo.save(grant);
+      oAuthSession.markCodeAsExchanged(grant);
+      this.sessionRepo.save(oAuthSession);
 
-    return {
-      access_token: this.accessTokenService.createToken(grant),
-      token_type: "Bearer"
+      return {
+        access_token: this.accessTokenService.createToken(grant),
+        token_type: "Bearer"
+      }
+    } catch (e: any) {
+      console.error(`Error occurred in authorize(). message: ${e.message ?? e.toString()}`);
+      if (e instanceof Error && e.stack != null) {
+        console.error(e.stack);
+      }
+      throw e;
     }
   }
 
