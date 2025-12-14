@@ -22,8 +22,8 @@ export class OAuthGrantRepository {
   public save(grant: OAuthGrant) {
     const userAndClientKey = this.getUserAndClientKey(grant);
     const existingGrant = this.userAndClientIndex.get(userAndClientKey);
-    if (existingGrant != null && existingGrant !== grant) {
-      throw new Error("Grant for this userId and clientId pair already exists.");
+    if (existingGrant != null) {
+      this.delete(existingGrant);
     }
 
     this.idIndex.set(grant.getId(), grant);
