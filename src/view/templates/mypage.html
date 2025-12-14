@@ -23,6 +23,10 @@
         <h1>{{name}}様、お帰りなさい</h1>
         <h2>カートの中身</h2>
         {{#each cartItems}}
+          <div style="display: flex; align-items: center; column-gap: 4px;">
+            <span>{{name}}</span>
+            <span>{{quantity}}個</span>
+          </div>
         {{else}}
         <div style="padding: 1em 0; color: #888;">
           カートの中身は空です

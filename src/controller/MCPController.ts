@@ -8,6 +8,9 @@ import { Scope } from "../domain/vo/Scope.js";
 import { ProductRepository } from "../domain/repository/ProductRepository.js";
 import { OAUTH_METADATA } from "./OAuthMetadataController.js";
 import { ENV } from "../utils/Env.js";
+import { CartRepository } from "../domain/repository/CartRepository.js";
+import { Cart } from "../domain/entity/Cart.js";
+import { CartItem } from "../domain/entity/CartItem.js";
 
 const controller = Router();
 
@@ -52,7 +55,47 @@ mcpServer.registerTool(
       ]
     }
   }
-)
+);
+
+mcpServer.registerTool(
+  "addProductsToCart",
+  {
+    title: "addProductsToCart",
+    description: "Add specified products to cart.",
+    inputSchema: {
+      items: z.array(
+        z.object({
+          productId: z.number(),
+          quantity: z.number()
+        })
+      )
+    }
+  },
+  async ({ items }, { authInfo }) => {
+    const userId = authInfo?.extra?.userId;
+    if (userId == null || typeof userId !== "string") {
+      throw new Error("Invalid user.");
+    }
+
+    const cartRepo = CartRepository.getInstance();
+    const productRepo = ProductRepository.getInstance();
+    const cart = cartRepo.findByUserId(userId) ?? new Cart(userId);
+
+    for (const { productId, quantity } of items) {
+      const product = productRepo.findById(productId);
+      if (product != null) {
+        cart.addItem(new CartItem(product, quantity));
+      }
+    }
+    cartRepo.save(cart);
+
+    return {
+      content: [
+        { type: "text", text: "Items added to cart." }
+      ]
+    }
+  }
+);
 
 const bearerAuthMiddleware = requireBearerAuth({
   verifier: OAuthService.getInstance(),

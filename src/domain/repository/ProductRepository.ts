@@ -77,11 +77,13 @@ const PRODUCTS: Product[] = [
   { id: 75, name: "まぐろ", aliases: ["マグロ", "鮪"] }
 ];
 
-const PRODUCT_INDEX = new Map<string, Product>();
+const nameIndex = new Map<string, Product>();
+const idIndex = new Map<number, Product>();
 for (const product of PRODUCTS) {
-  PRODUCT_INDEX.set(product.name, product);
+  idIndex.set(product.id, product);
+  nameIndex.set(product.name, product);
   for (const alias of product.aliases) {
-    PRODUCT_INDEX.set(alias, product);
+    nameIndex.set(alias, product);
   }
 }
 
@@ -98,8 +100,12 @@ export class ProductRepository {
 
   public findByNames(names: string[]) {
     return names
-      .map(name => PRODUCT_INDEX.get(name))
+      .map(name => nameIndex.get(name))
       .filter(product => product != null);
+  }
+
+  public findById(id: number) {
+    return idIndex.get(id);
   }
 
 }
