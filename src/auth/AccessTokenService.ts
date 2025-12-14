@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import type { OAuthGrant } from "../domain/entity/OAuthGrant.js";
+import { ENV } from "../utils/Env.js";
 
 export type AccessTokenPayload = {
   grantId: string;
@@ -45,8 +46,8 @@ export class AccessTokenService {
       {
         algorithm: "HS256",
         expiresIn: "4h",
-        audience: "https://test.com", // TODO: RS domain,
-        issuer: "https://test.com", // TODO: AS domain
+        audience: ENV.baseUrl,
+        issuer: ENV.baseUrl,
         subject: grant.getUserId()
       }
     );
@@ -56,8 +57,8 @@ export class AccessTokenService {
     try {
       const payload = jwt.verify(token, this.hmacSecret, {
         algorithms: ["HS256"],
-        issuer: "https://test.com",
-        audience: "https://test.com"
+        issuer: ENV.baseUrl,
+        audience: ENV.baseUrl
       });
       if (typeof payload !== "object") {
         throw new Error("payload is not an object!");

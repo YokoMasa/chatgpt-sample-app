@@ -1,13 +1,14 @@
 import { randomUUID } from "crypto";
 import { DomainError } from "../DomainError.js";
+import type { Product } from "./Product.js";
 
 export class CartItem {
   private id: string;
-  private itemId: string;
+  private product: Product;
   private quantity: number;
 
   constructor(
-    itemId: string,
+    product: Product,
     quantity: number
   ) {
     if (quantity < 1) {
@@ -15,7 +16,7 @@ export class CartItem {
     }
 
     this.id = randomUUID();
-    this.itemId = itemId;
+    this.product = product;
     this.quantity = quantity;
   }
 
@@ -23,8 +24,8 @@ export class CartItem {
     return this.id;
   }
 
-  public getItemId() {
-    return this.itemId;
+  public getProduct() {
+    return this.product;
   }
 
   public getQuantity() {

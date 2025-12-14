@@ -5,6 +5,9 @@ import { Router } from "express";
 import z from "zod";
 import { OAuthService } from "../auth/OAuthService.js";
 import { Scope } from "../domain/vo/Scope.js";
+import { ProductRepository } from "../domain/repository/ProductRepository.js";
+import { OAUTH_METADATA } from "./OAuthMetadataController.js";
+import { ENV } from "../utils/Env.js";
 
 const controller = Router();
 
@@ -31,10 +34,30 @@ mcpServer.registerTool(
   }
 );
 
+// Search Products Tool
+mcpServer.registerTool(
+  "searchProductByNames",
+  {
+    title: "searchProductByNames",
+    description: "Search products by names.",
+    inputSchema: {
+      names: z.array(z.string())
+    }
+  },
+  async ({ names }) => {
+    const products = ProductRepository.getInstance().findByNames(names);
+    return {
+      content: [
+        { type: "text", text: JSON.stringify(products) }
+      ]
+    }
+  }
+)
+
 const bearerAuthMiddleware = requireBearerAuth({
   verifier: OAuthService.getInstance(),
   requiredScopes: [Scope.MCP_DEFAULT],
-  resourceMetadataUrl: "" // TODO: RS metadata url
+  resourceMetadataUrl: ENV.baseUrl + "/.well-known/oauth-protected-resource/mcp"
 });
 controller.post('/', bearerAuthMiddleware, async (req, res) => {
   // In stateless mode, create a new transport for each request to prevent

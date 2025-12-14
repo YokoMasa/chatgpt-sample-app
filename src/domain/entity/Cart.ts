@@ -1,4 +1,4 @@
-import type { CartItem } from "./CartItem.js";
+import { CartItem } from "./CartItem.js";
 
 export class Cart {
   private userId: string;
