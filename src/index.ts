@@ -37,6 +37,9 @@ expressApp.use(session({
 }));
 
 // controllers
+if (!ENV.isProd) {
+  expressApp.use("/static", express.static("public"));
+}
 expressApp.use("/login", LoginController);
 expressApp.use("/logout", LogoutController);
 expressApp.use("/mypage", MyPageController);

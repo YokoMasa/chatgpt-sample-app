@@ -17,6 +17,7 @@ controller.get("/", (req, res) => {
       cartItems: cart.listItems().map(item => ({
         id: item.getId(),
         name: item.getProduct().name,
+        imagePath: item.getProduct().imagePath,
         quantity: item.getQuantity()
       }))
     });

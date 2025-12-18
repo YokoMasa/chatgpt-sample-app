@@ -1,12 +1,12 @@
 import type { Product } from "../entity/Product.js";
 
 const PRODUCTS: Product[] = [
-  { id: 1, name: "明日葉", aliases: ["あしたば", "アシタバ"] },
-  { id: 2, name: "アスパラガス", aliases: ["アスパラ", "あすぱら", "あすぱらがす"] },
-  { id: 3, name: "ウコン", aliases: ["うこん", "ターメリック"] },
-  { id: 4, name: "枝豆", aliases: ["えだまめ", "エダマメ"] },
-  { id: 5, name: "大葉", aliases: ["紫蘇", "しそ", "シソ"] },
-  { id: 6, name: "オクラ", aliases: ["おくら"] },
+  { id: 1, name: "明日葉", aliases: ["あしたば", "アシタバ"], imagePath: "/static/ashitaba.png" },
+  { id: 2, name: "アスパラガス", aliases: ["アスパラ", "あすぱら", "あすぱらがす"], imagePath: "/static/asparagus.png" },
+  { id: 3, name: "ウコン", aliases: ["うこん", "ターメリック"], imagePath: "/static/turmeric.png" },
+  { id: 4, name: "枝豆", aliases: ["えだまめ", "エダマメ"], imagePath: "/static/edamame.png" },
+  { id: 5, name: "大葉", aliases: ["紫蘇", "しそ", "シソ"], imagePath: "/static/shiso.png" },
+  { id: 6, name: "オクラ", aliases: ["おくら"], imagePath: "/static/okura.png" },
   { id: 7, name: "カブ", aliases: ["かぶ", "蕪"] },
   { id: 8, name: "かぼちゃ", aliases: ["カボチャ", "南瓜"] },
   { id: 9, name: "カリフラワー", aliases: [] },

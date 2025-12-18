@@ -24,6 +24,11 @@
         <h2>カートの中身</h2>
         {{#each cartItems}}
           <div style="display: flex; align-items: center; column-gap: 4px;">
+            {{#if imagePath}}
+            <img
+              src="{{imagePath}}"
+              style="width: 60px; height: 60px; object-fit: cover;"/>
+            {{/if}}
             <span>{{name}}</span>
             <span>{{quantity}}個</span>
           </div>

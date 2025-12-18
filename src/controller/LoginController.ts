@@ -11,12 +11,13 @@ controller.get("/", (req, res) => {
   }
 });
 
-controller.post("/", (req, res, next) => {
+controller.post("/", (req, res) => {
   const userId = req.body.user_id;
   const password = req.body.password;
 
-  if (userId == null || password !== "password") {
-    return next(new Error("Password is wrong"));
+  if (userId == null || password !== "1234Qwer") {
+    res.render("login", { wrongCredentials: true });
+    return;
   }
 
   req.session.userId = userId;
