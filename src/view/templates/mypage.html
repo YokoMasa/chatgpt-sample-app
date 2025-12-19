@@ -21,7 +21,14 @@
     <main style="display: flex; justify-content: center;">
       <div style="padding: 0 16px; width: 100%; max-width: 800px;">
         <h1>{{name}}様、お帰りなさい</h1>
-        <h2>カートの中身</h2>
+        <div style="display: flex; align-items: center; column-gap: 24px;">
+          <h2>カートの中身</h2>
+          <button
+            id="cart-clear-button"
+            style="font-size: 10pt; color: red; border: none; background-color: white; cursor: pointer; display: none;">
+            空にする
+          </button>
+        </div>
         <div id="cart-wrapper" style="display: grid; row-gap: 8px;"></div>
         <div
           id="no-item-mark"
@@ -34,9 +41,17 @@
     <script>
       const cartWrapperEl = document.getElementById("cart-wrapper");
       const noItemMarkEl = document.getElementById("no-item-mark");
+      const cartClearButtonEl = document.getElementById("cart-clear-button");
 
       function renderCartItems(items) {
         if (!Array.isArray(items)) {
+          return;
+        }
+
+        if (items.length === 0) {
+          cartWrapperEl.replaceChildren();
+          noItemMarkEl.style.display = "block";
+          cartClearButtonEl.style.display = "none";
           return;
         }
 
@@ -62,13 +77,10 @@
           for (let i = 0; i < itemElCount - items.length; i++) {
             cartWrapperEl.lastElementChild.remove();
           }
-        } else if (items.length === 0) {
-          cartWrapperEl.replaceChildren();
-          noItemMarkEl.style.display = "block";
-          return;
         }
 
         noItemMarkEl.style.display = "none";
+        cartClearButtonEl.style.display = "block";
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
           const itemId = item.itemId;
@@ -108,6 +120,23 @@
         }
       }
 
+      cartClearButtonEl.addEventListener("click", async () => {
+        try {
+          const resp = await fetch("/api/cart", {
+            method: "DELETE",
+            credentials: "include"
+          });
+          if (!resp.ok) {
+            alert("申し訳ございません、予期せぬエラーが発生しました。");
+            return;
+          }
+
+          refreshCartItems();
+        } catch (e) {
+          console.error(e);
+          alert("カートがクリアできませんでした。ネットワーク設定をご確認ください。");
+        }
+      });
       document.addEventListener("DOMContentLoaded", () => {
         refreshCartItems();
       });

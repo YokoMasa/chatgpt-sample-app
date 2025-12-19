@@ -5,10 +5,11 @@ import { Cart } from "../domain/entity/Cart.js";
 import { ProductRepository } from "../domain/repository/ProductRepository.js";
 
 const controller = Router();
+controller.use(SessionCheckMiddleware);
 
 const cartRepository = CartRepository.getInstance();
 
-controller.get("/", SessionCheckMiddleware, (req, res) => {
+controller.get("/", (req, res) => {
   const userId = req.session.userId;
   if (userId == null) {
     throw new Error("userId is null.");
@@ -34,7 +35,7 @@ controller.get("/", SessionCheckMiddleware, (req, res) => {
   res.send(respBody);
 });
 
-controller.delete("/item/:itemId", (req, res) => {
+controller.delete("/", (req, res) => {
   const userId = req.session.userId;
   if (userId == null) {
     throw new Error("userId is null.");
@@ -46,7 +47,7 @@ controller.delete("/item/:itemId", (req, res) => {
     return;
   }
 
-  cart.removeItem(req.params.itemId);
+  cart.clear();
   cartRepository.save(cart);
   res.sendStatus(200);
   return;
