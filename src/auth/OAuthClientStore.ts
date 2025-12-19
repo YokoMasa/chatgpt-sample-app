@@ -15,7 +15,7 @@ function mapClientToSDKForm(client: OAuthClient): OAuthClientInformationFull {
     client_name: client.getName(),
     client_uri: client.getClientUri()?.toString(),
     logo_uri: client.getLogoUri()?.toString(),
-    scope: [...client.getScopes()].join(","),
+    scope: [...client.getScopes()].join(" "),
     contacts: [...client.getContacts()],
     tos_uri: client.getTermsOfServiceUri()?.toString(),
     policy_uri: client.getPrivacyPolicyUri()?.toString(),

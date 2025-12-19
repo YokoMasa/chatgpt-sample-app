@@ -13,7 +13,6 @@ controller.use(
   "/oauth/client",
   clientRegistrationHandler({
     clientsStore: OAuthClientStore.getInstance(),
-    clientSecretExpirySeconds: 0,
     clientIdGeneration: false
   }
 ));

@@ -34,11 +34,4 @@ export class OAuthSessionRepository {
     this.indexByCode.delete(session.getAuthorizationCode());
   }
 
-  public deleteExpired() {
-    for (const session of this.indexByCode.values()) {
-      if (session.isExpired()) {
-        this.indexByCode.delete(session.getAuthorizationCode());
-      }
-    }
-  }
 }

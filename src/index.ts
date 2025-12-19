@@ -5,7 +5,6 @@ import { handlebarsEngine } from "./view/HandlebarsEngine.js";
 import MyPageController from "./controller/MyPageController.js";
 import NotFoundController from "./controller/NotFoundController.js";
 import LoginController from "./controller/LoginController.js";
-import { LRUCacheSessionStore } from "./auth/LRUCacheSessionStore.js";
 import LogoutController from "./controller/LogoutController.js";
 import OAuthASController from "./controller/OAuthASController.js";
 import MCPController from "./controller/MCPController.js";
@@ -33,8 +32,7 @@ expressApp.use(session({
   secret: ENV.sessionSecret,
   resave: false,
   saveUninitialized: false,
-  unset: "destroy",
-  store: new LRUCacheSessionStore(100)
+  unset: "destroy"
 }));
 
 // controllers
