@@ -11,6 +11,7 @@ import OAuthASController from "./controller/OAuthASController.js";
 import MCPController from "./controller/MCPController.js";
 import { ENV } from "./utils/Env.js";
 import OAuthMetadataController from "./controller/OAuthMetadataController.js";
+import CartApiController from "./controller/CartApiController.js";
 
 declare module 'express-session' {
   interface SessionData {
@@ -46,6 +47,7 @@ expressApp.use("/mypage", MyPageController);
 expressApp.use(OAuthMetadataController);
 expressApp.use(OAuthASController);
 expressApp.use("/mcp", MCPController);
+expressApp.use("/api/cart", CartApiController);
 expressApp.use("/", MyPageController);
 
 // Not Found Page

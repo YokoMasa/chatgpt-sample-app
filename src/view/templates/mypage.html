@@ -22,22 +22,100 @@
       <div style="padding: 0 16px; width: 100%; max-width: 800px;">
         <h1>{{name}}様、お帰りなさい</h1>
         <h2>カートの中身</h2>
-        {{#each cartItems}}
-          <div style="display: flex; align-items: center; column-gap: 4px;">
-            {{#if imagePath}}
-            <img
-              src="{{imagePath}}"
-              style="width: 60px; height: 60px; object-fit: cover;"/>
-            {{/if}}
-            <span>{{name}}</span>
-            <span>{{quantity}}個</span>
-          </div>
-        {{else}}
-        <div style="padding: 1em 0; color: #888;">
+        <div id="cart-wrapper" style="display: grid; row-gap: 8px;"></div>
+        <div
+          id="no-item-mark"
+          style="padding: 1em 0; color: #888; display: none;">
           カートの中身は空です
         </div>
-        {{/each}}
       </div>
     </main>
+
+    <script>
+      const cartWrapperEl = document.getElementById("cart-wrapper");
+      const noItemMarkEl = document.getElementById("no-item-mark");
+
+      function renderCartItems(items) {
+        if (!Array.isArray(items)) {
+          return;
+        }
+
+        const itemElCount = cartWrapperEl.children.length;
+        if (itemElCount < items.length) {
+          for (let i = 0; i < items.length - itemElCount; i++) {
+            const itemEl = document.createElement("div");
+            itemEl.style = "display: flex; align-items: center; column-gap: 8px;";
+
+            const itemImageEl = document.createElement("img");
+            itemImageEl.style = "width: 60px; height: 60px; object-fit: contain; display: none;";
+            itemEl.appendChild(itemImageEl);
+
+            const itemNameEl = document.createElement("span");
+            itemEl.appendChild(itemNameEl);
+
+            const itemQuantityEl = document.createElement("span");
+            itemEl.appendChild(itemQuantityEl);
+
+            cartWrapperEl.appendChild(itemEl);
+          }
+        } else if (items.length < itemElCount) {
+          for (let i = 0; i < itemElCount - items.length; i++) {
+            cartWrapperEl.lastElementChild.remove();
+          }
+        } else if (items.length === 0) {
+          cartWrapperEl.replaceChildren();
+          noItemMarkEl.style.display = "block";
+          return;
+        }
+
+        noItemMarkEl.style.display = "none";
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const itemId = item.itemId;
+          const productName = item.productName;
+          const productImagePath = item.productImagePath;
+          const quantity = item.quantity;
+
+          const itemEl = cartWrapperEl.children.item(i);
+          const imageEl = itemEl.children.item(0);
+          imageEl.style.display = productImagePath != null ? "block" : "none";
+          imageEl.src = productImagePath;
+
+          const nameEl = itemEl.children.item(1);
+          nameEl.textContent = productName;
+
+          const quantityEl = itemEl.children.item(2);
+          quantityEl.textContent = quantity + "個";
+        }
+      }
+
+      async function refreshCartItems() {
+        try {
+          const resp = await fetch("/api/cart", {
+            credentials: "include"
+          });
+          if (!resp.ok) {
+            console.error(await resp.text());
+            alert("申し訳ございません、予期せぬエラーが発生しました。");
+            return;
+          }
+
+          const body = await resp.json();
+          renderCartItems(body);
+        } catch (e) {
+          console.error(e);
+          alert("カートの中身の取得ができませんでした。ネットワーク設定をご確認ください。");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        refreshCartItems();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          refreshCartItems();
+        }
+      });
+    </script>
   </body>
 </html>
