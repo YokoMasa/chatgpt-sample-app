@@ -14,29 +14,10 @@ import { CartItem } from "../domain/entity/CartItem.js";
 const controller = Router();
 
 const mcpServer = new McpServer({
-  name: 'example-server',
+  name: '○×商店 MCP Server',
   version: '1.0.0'
 });
 
-// Set up your tools, resources, and prompts
-mcpServer.registerTool(
-  'echo',
-  {
-    title: 'Echo Tool',
-    description: 'Echoes back the provided message',
-    inputSchema: { message: z.string() },
-    outputSchema: { echo: z.string() }
-  },
-  async ({ message }, { authInfo }) => {
-    const output = { echo: `Tool echo: ${message}. Authorized as: ${authInfo?.extra?.userId}` };
-    return {
-      content: [{ type: 'text', text: JSON.stringify(output) }],
-      structuredContent: output
-    };
-  }
-);
-
-// Search Products Tool
 mcpServer.registerTool(
   "searchProductByNames",
   {
@@ -47,6 +28,7 @@ mcpServer.registerTool(
     }
   },
   async ({ names }) => {
+    console.log(`TOOL: searchProductByNames, ARGS: ${JSON.stringify(names)}`);
     const products = ProductRepository.getInstance().findByNames(names);
     return {
       content: [
@@ -71,6 +53,7 @@ mcpServer.registerTool(
     }
   },
   async ({ items }, { authInfo }) => {
+    console.log(`TOOL: addProductsToCart, ARGS: ${JSON.stringify(items)}`);
     const userId = authInfo?.extra?.userId;
     if (userId == null || typeof userId !== "string") {
       throw new Error("Invalid user.");
@@ -96,17 +79,48 @@ mcpServer.registerTool(
   }
 );
 
+mcpServer.registerTool(
+  "listItemsInCart",
+  {
+    title: "listItemsInCart",
+    description: "List items in cart.",
+  },
+  async ({ authInfo }) => {
+    console.log(`TOOL: listItemsInCart`);
+    const userId = authInfo?.extra?.userId;
+    if (userId == null || typeof userId !== "string") {
+      throw new Error("Invalid user.");
+    }
+
+    const cartRepo = CartRepository.getInstance();
+    const cart = cartRepo.findByUserId(userId) ?? new Cart(userId);
+
+    const items = cart.listItems()
+      .map(item => ({
+        id: item.getId(),
+        productName: item.getProduct().name,
+        productId: item.getProduct().id,
+        quantity: item.getQuantity()
+      }))
+      .toArray()
+
+    return {
+      content: [
+        { type: "text", text: JSON.stringify(items) },
+      ],
+      structuredContent: {
+        items
+      }
+    }
+  }
+);
+
 const bearerAuthMiddleware = requireBearerAuth({
   verifier: OAuthService.getInstance(),
   requiredScopes: [Scope.MCP_DEFAULT],
   resourceMetadataUrl: ENV.baseUrl + "/.well-known/oauth-protected-resource/mcp"
 });
 controller.post('/', bearerAuthMiddleware, async (req, res) => {
-  // In stateless mode, create a new transport for each request to prevent
-  // request ID collisions. Different clients may use the same JSON-RPC request IDs,
-  // which would cause responses to be routed to the wrong HTTP connections if
-  // the transport state is shared.
-  
   try {
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
