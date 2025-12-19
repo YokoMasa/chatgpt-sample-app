@@ -94,7 +94,7 @@ export class OAuthClient {
   }
 
   public getExpiresAt() {
-    return new Date(this.createdAt.getTime() + 1000 * 60 * 10);
+    return new Date(this.createdAt.getTime() + 1000 * 60 * 30); // 30分後
   }
 
   public getClientUri() {

@@ -2,6 +2,9 @@ runtime: nodejs22
 automatic_scaling:
   max_instances: 1
 handlers:
+  - url: /favicon\.png
+    static_files: favicon.png
+    upload: favicon\.png
   - url: /static
     static_dir: public
   - url: /.*
