@@ -99,9 +99,14 @@ export class ProductRepository {
   }
 
   public findByNames(names: string[]) {
-    return names
-      .map(name => nameIndex.get(name))
-      .filter(product => product != null);
+    const productSet = new Set<Product>();
+    for (const name of names) {
+      const product = nameIndex.get(name);
+      if (product != null) {
+        productSet.add(product);
+      }
+    }
+    return [...productSet.values()];
   }
 
   public findById(id: number) {

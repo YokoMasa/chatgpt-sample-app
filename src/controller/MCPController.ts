@@ -6,7 +6,6 @@ import z from "zod";
 import { OAuthService } from "../auth/OAuthService.js";
 import { Scope } from "../domain/vo/Scope.js";
 import { ProductRepository } from "../domain/repository/ProductRepository.js";
-import { OAUTH_METADATA } from "./OAuthMetadataController.js";
 import { ENV } from "../utils/Env.js";
 import { CartRepository } from "../domain/repository/CartRepository.js";
 import { Cart } from "../domain/entity/Cart.js";

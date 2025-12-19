@@ -20,7 +20,9 @@ function mapClientToSDKForm(client: OAuthClient): OAuthClientInformationFull {
     tos_uri: client.getTermsOfServiceUri()?.toString(),
     policy_uri: client.getPrivacyPolicyUri()?.toString(),
     software_id: client.getSoftwareId(),
-    software_version: client.getSoftwareVersion()
+    software_version: client.getSoftwareVersion(),
+    client_id_issued_at: Math.floor(client.getCreatedAt().getTime() / 1000),
+    client_secret_expires_at: Math.floor(client.getExpiresAt().getTime() / 1000)
   };
 }
 
