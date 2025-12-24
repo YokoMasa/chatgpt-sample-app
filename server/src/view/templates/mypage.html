@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.png"/>
+    <title>マイページ</title>
+  </head>
+  <body>
+    <header style="height: 50px; display: flex; justify-content: center;">
+      <div style="padding: 0 16px; width: 100%; max-width: 800px; display: flex; align-items: center;">
+        <div style="font-weight: 700; font-size: 16pt">
+          ◯×商店
+        </div>
+        <div style="flex-grow: 1;">
+        </div>
+        <a style="text-decoration: none; color: black;" href="/logout">
+          ログアウト
+        </a>
+      </div>
+    </header>
+
+    <main style="display: flex; justify-content: center;">
+      <div style="padding: 0 16px; width: 100%; max-width: 800px;">
+        <h1>{{name}}様、お帰りなさい</h1>
+        <div style="display: flex; align-items: center; column-gap: 24px;">
+          <h2>カートの中身</h2>
+          <button
+            id="cart-clear-button"
+            style="font-size: 10pt; color: red; border: none; background-color: white; cursor: pointer; display: none;">
+            空にする
+          </button>
+        </div>
+        <div id="cart-wrapper" style="display: grid; row-gap: 8px;"></div>
+        <div
+          id="no-item-mark"
+          style="padding: 1em 0; color: #888; display: none;">
+          カートの中身は空です
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const cartWrapperEl = document.getElementById("cart-wrapper");
+      const noItemMarkEl = document.getElementById("no-item-mark");
+      const cartClearButtonEl = document.getElementById("cart-clear-button");
+
+      function renderCartItems(items) {
+        if (!Array.isArray(items)) {
+          return;
+        }
+
+        if (items.length === 0) {
+          cartWrapperEl.replaceChildren();
+          noItemMarkEl.style.display = "block";
+          cartClearButtonEl.style.display = "none";
+          return;
+        }
+
+        const itemElCount = cartWrapperEl.children.length;
+        if (itemElCount < items.length) {
+          for (let i = 0; i < items.length - itemElCount; i++) {
+            const itemEl = document.createElement("div");
+            itemEl.style = "display: flex; align-items: center; column-gap: 8px;";
+
+            const itemImageEl = document.createElement("img");
+            itemImageEl.style = "width: 60px; height: 60px; object-fit: contain; display: none;";
+            itemEl.appendChild(itemImageEl);
+
+            const itemNameEl = document.createElement("span");
+            itemEl.appendChild(itemNameEl);
+
+            const itemQuantityEl = document.createElement("span");
+            itemEl.appendChild(itemQuantityEl);
+
+            cartWrapperEl.appendChild(itemEl);
+          }
+        } else if (items.length < itemElCount) {
+          for (let i = 0; i < itemElCount - items.length; i++) {
+            cartWrapperEl.lastElementChild.remove();
+          }
+        }
+
+        noItemMarkEl.style.display = "none";
+        cartClearButtonEl.style.display = "block";
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const itemId = item.itemId;
+          const productName = item.productName;
+          const productImagePath = item.productImagePath;
+          const quantity = item.quantity;
+
+          const itemEl = cartWrapperEl.children.item(i);
+          const imageEl = itemEl.children.item(0);
+          imageEl.style.display = productImagePath != null ? "block" : "none";
+          imageEl.src = productImagePath;
+
+          const nameEl = itemEl.children.item(1);
+          nameEl.textContent = productName;
+
+          const quantityEl = itemEl.children.item(2);
+          quantityEl.textContent = quantity + "個";
+        }
+      }
+
+      async function refreshCartItems() {
+        try {
+          const resp = await fetch("/api/cart", {
+            credentials: "include"
+          });
+          if (!resp.ok) {
+            console.error(await resp.text());
+            alert("申し訳ございません、予期せぬエラーが発生しました。");
+            return;
+          }
+
+          const body = await resp.json();
+          renderCartItems(body);
+        } catch (e) {
+          console.error(e);
+          alert("カートの中身の取得ができませんでした。ネットワーク設定をご確認ください。");
+        }
+      }
+
+      cartClearButtonEl.addEventListener("click", async () => {
+        try {
+          const resp = await fetch("/api/cart", {
+            method: "DELETE",
+            credentials: "include"
+          });
+          if (!resp.ok) {
+            alert("申し訳ございません、予期せぬエラーが発生しました。");
+            return;
+          }
+
+          refreshCartItems();
+        } catch (e) {
+          console.error(e);
+          alert("カートがクリアできませんでした。ネットワーク設定をご確認ください。");
+        }
+      });
+      document.addEventListener("DOMContentLoaded", () => {
+        refreshCartItems();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          refreshCartItems();
+        }
+      });
+    </script>
+  </body>
+</html>

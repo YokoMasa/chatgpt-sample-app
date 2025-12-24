@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.png"/>
+    <title>ログイン</title>
+  </head>
+  <body style="margin: 0;">
+    <header style="height: 50px; display: flex; justify-content: center;">
+      <div style="padding: 0 16px; width: 100%; max-width: 800px; display: flex; align-items: center;">
+        <div style="font-weight: 700; font-size: 16pt">
+          ◯×商店
+        </div>
+        <div style="flex-grow: 1;">
+        </div>
+      </div>
+    </header>
+
+    <main style="height: calc(80vh - 50px); display: flex; align-items: center; justify-content: center; padding: 0 16px;">
+      <div style="width: 450px; padding: 16px;">
+        <h1>ログイン</h1>
+        <form
+          method="post"
+          style="display: grid; row-gap: 16px;">
+          <div style="display: grid;">
+            <label for="user_id">ログインID</label>
+            <input
+              id="user_id"
+              name="user_id"
+              style="padding: 4px; border-radius: 4px;"
+              required/>
+          </div>
+          <div style="display: grid;">
+            <label for="password">パスワード</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              style="padding: 4px; border-radius: 4px;"
+              required/>
+          </div>
+          <button
+            style="display: inline-block; background-color: #333; color: white; cursor: pointer; border: none; border-radius: 4px; padding: 8px 32px;">
+            ログイン
+          </button>
+        </form>
+
+        {{#if wrongCredentials}}
+        <div
+          style="margin-top: 16px; padding: 8px; background-color: #ffc9c9; border: 1px solid #C10007; border-radius: 4px; font-size: 10pt; color: #82181a;">
+          ログインID・パスワードが誤っています。
+        </div>
+        {{/if}}
+      </div>
+    </main>
+  </body>
+</html>
