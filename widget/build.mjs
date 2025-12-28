@@ -1,17 +1,7 @@
-import { readdir } from 'fs/promises';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { build } from "vite"
-
-async function listInputs() {
-  const fileNames = await readdir("src");
-  return fileNames
-    .filter(name => name.endsWith(".tsx") || name.endsWith(".ts"))
-    .map(name => ({
-      path: `src/${name}`,
-      chunkName: name.split(".")[0]
-    }));
-}
+import { listWidgetSources } from "./utils.mjs"
 
 function renderHtml(title, jsCode, css) {
   return `<!DOCTYPE html>
@@ -59,8 +49,8 @@ function chatgptWidgetPlugin(chunkName) {
   };
 }
 
-const inputs = await listInputs();
-for (const { path, chunkName } of inputs) {
+const sources = await listWidgetSources();
+for (const { path, chunkName } of sources) {
   await build({
     build: {
       emptyOutDir: false,
