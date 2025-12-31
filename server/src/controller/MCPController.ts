@@ -10,13 +10,31 @@ import { ENV } from "../utils/Env.js";
 import { CartRepository } from "../domain/repository/CartRepository.js";
 import { Cart } from "../domain/entity/Cart.js";
 import { CartItem } from "../domain/entity/CartItem.js";
+import { readFile } from "fs/promises";
 
 const controller = Router();
+
+const testWidgetHtml = await readFile(`${ENV.widgetDir}/TestWidget.html`, { encoding: "utf8" });
 
 const mcpServer = new McpServer({
   name: '○×商店 MCP Server',
   version: '1.0.0'
 });
+
+mcpServer.registerResource(
+  "test-widget",
+  "ui://widget/test-widget.html",
+  {},
+  async () => ({
+    contents: [
+      {
+        uri: "ui://widget/test-widget.html",
+        mimeType: "text/html+skybridge",
+        text: testWidgetHtml.trim()
+      }
+    ]
+  })
+);
 
 mcpServer.registerTool(
   "searchProductByNames",
@@ -25,6 +43,9 @@ mcpServer.registerTool(
     description: "Search products by names.",
     inputSchema: {
       names: z.array(z.string())
+    },
+    _meta: {
+      "openai/outputTemplate": "ui://widget/test-widget.html"
     }
   },
   async ({ names }) => {

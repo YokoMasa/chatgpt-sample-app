@@ -91,13 +91,6 @@ function widgetPreviewPlugin() {
 
 const server = await createServer({
   configFile: false,
-  build: {
-    rollupOptions: {
-      input: [
-        "src/TestWidget.tsx"
-      ]
-    }
-  },
   plugins: [
     react(),
     tailwindcss(),
