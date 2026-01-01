@@ -30,8 +30,12 @@ function renderWidgetHtml(widgetName) {
 <html>
   <head>
     <title>${widgetName}</title>
+    <script>
+      window.openai = {};
+    </script>
     <script type="module">
       import "/widgets/${widgetName}";
+      import "/mock-init/${widgetName}";
     </script>
   </head>
   <body>
@@ -72,6 +76,8 @@ function widgetPreviewPlugin() {
     resolveId(source) {
       if (source.startsWith("/widgets/")) {
         return "src/" + source.slice(9) + ".tsx";
+      } else if (source.startsWith("/mock-init/")) {
+        return "src/content/" + source.slice(11) + "MockInitializer.ts";
       }
       return null;
     },
@@ -82,6 +88,7 @@ function widgetPreviewPlugin() {
           return source;
         } catch (e) {
           console.warn(`[load] error: ${e.message ?? e.toString()}`);
+          return "";
         }
       }
       return null;
