@@ -89,6 +89,10 @@ export class SetGlobalsEvent extends CustomEvent<{
   readonly type = SET_GLOBALS_EVENT_TYPE;
 }
 
+export function notifyGlobalsChange() {
+  window.dispatchEvent(new CustomEvent(SET_GLOBALS_EVENT_TYPE, { detail: { globals: window.openai } }));
+}
+
 /**
  * Global oai object injected by the web sandbox for communicating with chatgpt host page.
  */

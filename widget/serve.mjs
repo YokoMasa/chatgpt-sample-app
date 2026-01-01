@@ -34,13 +34,17 @@ function renderWidgetHtml(widgetName) {
       window.openai = {};
     </script>
     <script type="module">
-      import "/widgets/${widgetName}";
-      import "/mock-init/${widgetName}";
+      import "src/preview/PreviewController.tsx"
+      import "src/${widgetName}.tsx";
+      import "src/content/${widgetName}MockInitializer.ts";
     </script>
   </head>
   <body>
     <main class="flex justify-center">
-      <div id="root" class="w-[400px]"></div>
+      <div class="w-[400px] grid gap-y-4">
+        <div id="root"></div>
+        <div id="preview-controller"></div>
+      </div>
     </main>
   </body>
 </html>
@@ -74,12 +78,7 @@ function widgetPreviewPlugin() {
       });
     },
     resolveId(source) {
-      if (source.startsWith("/widgets/")) {
-        return "src/" + source.slice(9) + ".tsx";
-      } else if (source.startsWith("/mock-init/")) {
-        return "src/content/" + source.slice(11) + "MockInitializer.ts";
-      }
-      return null;
+      return source;
     },
     async load(id) {
       if (id.startsWith("src/")) {

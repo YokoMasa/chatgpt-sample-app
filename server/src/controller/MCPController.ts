@@ -53,7 +53,14 @@ mcpServer.registerTool(
     return {
       content: [
         { type: "text", text: JSON.stringify(products) }
-      ]
+      ],
+      structuredContent: {
+        products: products.map(p => ({
+          id: p.id,
+          name: p.name,
+          imagePath: p.imagePath
+        }))
+      }
     }
   }
 );

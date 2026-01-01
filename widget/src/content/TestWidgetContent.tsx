@@ -1,4 +1,5 @@
 import { useOpenAiGlobal } from "../hooks/use-openai-global";
+import { clsx } from "clsx";
 
 export type TestWidgetToolOutput = {
   products: {
@@ -10,12 +11,17 @@ export type TestWidgetToolOutput = {
 
 export function TestWidgetContent() {
   const toolOutput = useOpenAiGlobal("toolOutput") as TestWidgetToolOutput | null;
+  const theme = useOpenAiGlobal("theme");
   
   return (
     <>
-      <div className="grid row-gap-2">
+      <div className="grid gap-y-2">
         { toolOutput != null && toolOutput.products.map(product => (
-          <div className="flex items-center column-gap-2">
+          <div
+            className={clsx(
+              "flex items-center gap-x-2",
+              theme === "dark" ? "text-white" : undefined
+            )}>
             { product.imagePath != null &&
               <img
                 className="w-[60px] h-[60px]"
