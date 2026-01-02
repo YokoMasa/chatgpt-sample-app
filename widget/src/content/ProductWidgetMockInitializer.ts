@@ -1,5 +1,5 @@
-import { TestWidgetToolOutput } from "./TestWidgetContent";
-import { notifyGlobalsChange, SET_GLOBALS_EVENT_TYPE } from "../types";
+import { ProductWidgetToolOutput } from "./ProductWidgetContent";
+import { notifyGlobalsChange } from "../types";
 
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: "1", name: "明日葉", imagePath: "/static/ashitaba.png" },
         { id: "8", name: "かぼちゃ", imagePath: "/static/kabocha.png" }
       ]
-    } as TestWidgetToolOutput;
+    } as ProductWidgetToolOutput;
     notifyGlobalsChange();
   }, 300);
 });

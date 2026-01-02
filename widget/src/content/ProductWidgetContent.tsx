@@ -1,7 +1,7 @@
 import { useOpenAiGlobal } from "../hooks/use-openai-global";
 import { clsx } from "clsx";
 
-export type TestWidgetToolOutput = {
+export type ProductWidgetToolOutput = {
   products: {
     id: string;
     name: string;
@@ -9,8 +9,8 @@ export type TestWidgetToolOutput = {
   }[];
 }
 
-export function TestWidgetContent() {
-  const toolOutput = useOpenAiGlobal("toolOutput") as TestWidgetToolOutput | null;
+export function ProductWidgetContent() {
+  const toolOutput = useOpenAiGlobal("toolOutput") as ProductWidgetToolOutput | null;
   const theme = useOpenAiGlobal("theme");
   
   return (

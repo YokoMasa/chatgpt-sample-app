@@ -14,7 +14,7 @@ import { readFile } from "fs/promises";
 
 const controller = Router();
 
-const testWidgetHtml = await readFile(`${ENV.widgetDir}/TestWidget.html`, { encoding: "utf8" });
+const productWidgetHtml = await readFile(`${ENV.widgetDir}/ProductWidget.html`, { encoding: "utf8" });
 
 const mcpServer = new McpServer({
   name: '○×商店 MCP Server',
@@ -22,15 +22,15 @@ const mcpServer = new McpServer({
 });
 
 mcpServer.registerResource(
-  "test-widget",
-  "ui://widget/test-widget.html",
+  "product-widget",
+  "ui://widget/product-widget.html",
   {},
   async () => ({
     contents: [
       {
-        uri: "ui://widget/test-widget.html",
+        uri: "ui://widget/product-widget.html",
         mimeType: "text/html+skybridge",
-        text: testWidgetHtml.trim()
+        text: productWidgetHtml.trim()
       }
     ]
   })
@@ -113,8 +113,7 @@ mcpServer.registerTool(
         }
       ],
       structuredContent: {
-        result: "OK",
-        currentItemsInCart: cart.listItems()
+        items: cart.listItems()
           .map(item => ({
             id: item.getId(),
             productName: item.getProduct().name,
