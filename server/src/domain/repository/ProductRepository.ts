@@ -80,6 +80,7 @@ const PRODUCTS: Product[] = [
   { id: 78, name: "えのき", aliases: ["エノキ", "エノキタケ"], imagePath: "/static/enoki.png" },
   { id: 79, name: "しいたけ", aliases: ["シイタケ", "椎茸"], imagePath: "/static/shiitake.png" },
   { id: 80, name: "しょうが", aliases: ["ショウガ", "生姜"], imagePath: "/static/syouga.png" },
+  { id: 81, name: "鮭", aliases: ["しゃけ", "シャケ", "さけ", "サケ"], imagePath: "/static/sake_kirimi.png" },
 ];
 
 const idIndex = new Map<number, Product>();
