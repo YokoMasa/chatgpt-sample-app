@@ -11,13 +11,13 @@ function renderHtml(title, jsCode, css) {
     <style>
       ${css}
     </style>
+    <script type="module">
+      ${jsCode}
+    </script>
   </head>
   <body>
     <main id="root">
     </main>
-    <script>
-      ${jsCode}
-    </script>
   </body>
 </html>
 `;

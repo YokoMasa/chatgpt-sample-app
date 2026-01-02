@@ -15,6 +15,7 @@ import { readFile } from "fs/promises";
 const controller = Router();
 
 const productWidgetHtml = await readFile(`${ENV.widgetDir}/ProductWidget.html`, { encoding: "utf8" });
+const cartWidgetHtml = await readFile(`${ENV.widgetDir}/CartWidget.html`, { encoding: "utf8" });
 
 const mcpServer = new McpServer({
   name: '○×商店 MCP Server',
@@ -36,6 +37,21 @@ mcpServer.registerResource(
   })
 );
 
+mcpServer.registerResource(
+  "cart-widget",
+  "ui://widget/cart-widget.html",
+  {},
+  async () => ({
+    contents: [
+      {
+        uri: "ui://widget/cart-widget.html",
+        mimeType: "text/html+skybridge",
+        text: cartWidgetHtml.trim()
+      }
+    ]
+  })
+);
+
 mcpServer.registerTool(
   "searchProductByNames",
   {
@@ -45,7 +61,7 @@ mcpServer.registerTool(
       names: z.array(z.string())
     },
     _meta: {
-      "openai/outputTemplate": "ui://widget/test-widget.html"
+      "openai/outputTemplate": "ui://widget/product-widget.html"
     }
   },
   async ({ names }) => {
@@ -77,6 +93,9 @@ mcpServer.registerTool(
           quantity: z.number()
         })
       )
+    },
+    _meta: {
+      "openai/outputTemplate": "ui://widget/cart-widget.html"
     }
   },
   async ({ items }, { authInfo }) => {
@@ -131,6 +150,9 @@ mcpServer.registerTool(
   {
     title: "listItemsInCart",
     description: "List items in cart.",
+    _meta: {
+      "openai/outputTemplate": "ui://widget/cart-widget.html"
+    }
   },
   async ({ authInfo }) => {
     const userId = authInfo?.extra?.userId;

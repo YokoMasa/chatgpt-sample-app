@@ -7,12 +7,10 @@ export function PreviewControllerContent() {
   const handleThemeChange = useCallback((isDarkMode: boolean) => {
     setIsDarkMode(isDarkMode);
     if (isDarkMode) {
-      document.body.style.backgroundColor = "#212121";
-      document.body.classList.add("dark");
+      document.getElementById("root")!.style.backgroundColor = "#212121";
       window.openai.theme = "dark";
     } else {
-      document.body.style.backgroundColor = "#FFFFFF";
-      document.body.classList.remove("dark");
+      document.getElementById("root")!.style.backgroundColor = "#FFFFFF";
       window.openai.theme = "light";
     }
     notifyGlobalsChange();
@@ -21,7 +19,7 @@ export function PreviewControllerContent() {
   ]);
 
   return (
-    <div className="dark:text-white">
+    <div>
       <h2 className="my-3 text-xl">
         コントロールパネル
       </h2>

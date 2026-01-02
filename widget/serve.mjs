@@ -31,7 +31,11 @@ function renderWidgetHtml(widgetName) {
   <head>
     <title>${widgetName}</title>
     <script>
-      window.openai = {};
+      window.openai = {
+        openExternal: args => {
+          window.open(args.href);  
+        }
+      };
     </script>
     <script type="module">
       import "src/preview/PreviewController.tsx"
@@ -61,7 +65,7 @@ function widgetPreviewPlugin() {
           res.statusCode = 200;
           res.end(
             await server.transformIndexHtml(
-              req.url,
+              req.originalUrl,
               renderWidgetHtml(widgetSource.chunkName)
             )
           );
