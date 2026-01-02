@@ -137,6 +137,7 @@ mcpServer.registerTool(
             id: item.getId(),
             productName: item.getProduct().name,
             productId: item.getProduct().id,
+            productImagePath: item.getProduct().imagePath,
             quantity: item.getQuantity()
           }))
           .toArray()
@@ -168,6 +169,7 @@ mcpServer.registerTool(
         id: item.getId(),
         productName: item.getProduct().name,
         productId: item.getProduct().id,
+        productImagePath: item.getProduct().imagePath,
         quantity: item.getQuantity()
       }))
       .toArray()

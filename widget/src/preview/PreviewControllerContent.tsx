@@ -24,8 +24,8 @@ export function PreviewControllerContent() {
         コントロールパネル
       </h2>
       <div className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2">
-        <div>
-          テーマ
+        <div className="font-bold">
+          テーマ:
         </div>
         <div className="flex items-center gap-x-2">
           <div className="flex items-center gap-x-1">

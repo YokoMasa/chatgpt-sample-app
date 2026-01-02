@@ -9,6 +9,7 @@ export type CartWidgetToolOutput = {
     id: string;
     productName: string;
     productId: string;
+    productImagePath?: string;
     quantity: number;
   }[]
 }
@@ -31,23 +32,43 @@ export function CartWidgetContent() {
         カートの中身
       </h2>
       <div
-        className={"grid grid-cols-[max-content_1fr] gap-2"}>
+        className={"grid grid-cols-[max-content_1fr] gap-3"}>
         { toolOutput != null && toolOutput.items.map(item => (
           <>
-            <div>{ item.productName }</div>
-            <div>×{ item.quantity }個</div>
+            <div className="flex items-center gap-x-2">
+              { item.productImagePath != null &&
+                <img
+                  className="w-[60px] h-[60px]"
+                  src={`https://chatgpt-sample-app-481008.an.r.appspot.com/${item.productImagePath}`}/>
+              }
+              <span>
+                { item.productName }
+              </span>
+            </div>
+            <div className="self-center">
+              ×{ item.quantity }個
+            </div>
           </>
         )) }
+
+        { toolOutput != null && toolOutput.items.length === 0 &&
+          <div className="col-span-2 flex items-center justify-center h-[40px] text-[#8F8F8F] dark:text-[AFAFAF]">
+            カートは空です
+          </div>
+        }
       </div>
-      <div className="mt-4">
-        <Button
-          color="secondary"
-          block
-          onClick={handleOpenInExternalTabClick}>
-          ○×商店でカートを確認する
-          <ExternalLink/>
-        </Button>
-      </div>
+
+      { toolOutput != null && 0 < toolOutput.items.length &&
+        <div className="mt-4">
+          <Button
+            color="secondary"
+            block
+            onClick={handleOpenInExternalTabClick}>
+            ○×商店でカートを確認する
+            <ExternalLink/>
+          </Button>
+        </div>
+      }
     </div>
   );
 }
