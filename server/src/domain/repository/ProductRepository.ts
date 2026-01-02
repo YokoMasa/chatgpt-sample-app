@@ -63,28 +63,28 @@ const PRODUCTS: Product[] = [
   { id: 61, name: "れんこん", aliases: ["レンコン", "蓮根"], imagePath: "/static/renkon.png" },
   { id: 62, name: "牛肉", aliases: [], imagePath: "/static/niku_gyu.png" },
   { id: 63, name: "豚肉", aliases: [], imagePath: "/static/niku_buta.png" },
-  { id: 64, name: "鶏もも", aliases: [], imagePath: "/static/niku_tori_momo.png" },
-  { id: 65, name: "鶏むね", aliases: [] },
-  { id: 66, name: "鶏ささみ", aliases: [], imagePath: "/static/food_niku_tori_sasami.png" },
-  { id: 67, name: "鶏手羽元", aliases: [], imagePath: "/static/food_chicken_tebamoto_nama.png" },
-  { id: 68, name: "鶏手羽先", aliases: [], imagePath: "/static/food_chicken_tebasaki_nama.png" },
+  { id: 64, name: "鶏もも", aliases: ["とりもも", "とりもも肉", "鶏もも肉"], imagePath: "/static/niku_tori_momo.png" },
+  { id: 65, name: "鶏むね", aliases: ["とりむね", "とりむね肉", "鶏むね肉"] },
+  { id: 66, name: "鶏ささみ", aliases: ["とりささみ", "とりささみ肉", "鶏ささみ肉"], imagePath: "/static/food_niku_tori_sasami.png" },
+  { id: 67, name: "鶏手羽元", aliases: ["とり手羽元", "鶏手羽", "とりてば肉"], imagePath: "/static/food_chicken_tebamoto_nama.png" },
+  { id: 68, name: "鶏手羽先", aliases: ["手羽先", "手羽先肉", "てばさき"], imagePath: "/static/food_chicken_tebasaki_nama.png" },
   { id: 69, name: "さば", aliases: ["サバ", "鯖"], imagePath: "/static/fish_saba2.png" },
   { id: 70, name: "いわし", aliases: ["鰯", "イワシ"], imagePath: "/static/fish_sakana_iwashi.png" },
   { id: 71, name: "さんま", aliases: ["秋刀魚", "サンマ"], imagePath: "/static/fish_sakana_sanma.png" },
   { id: 72, name: "たら", aliases: ["タラ", "鱈"], imagePath: "/static/fish_tara.png" },
   { id: 73, name: "あじ", aliases: ["アジ", "鯵"], imagePath: "/static/fish_aji2.png" },
   { id: 74, name: "ぶり", aliases: ["ブリ", "鰤"], imagePath: "/static/fish_buri2.png" },
-  { id: 75, name: "まぐろ", aliases: ["マグロ", "鮪"], imagePath: "/static/sashimi_maguro_akami.png" }
+  { id: 75, name: "まぐろ", aliases: ["マグロ", "鮪"], imagePath: "/static/sashimi_maguro_akami.png" },
+  { id: 76, name: "しめじ", aliases: ["シメジ"], imagePath: "/static/shimeji.png" },
+  { id: 77, name: "エリンギ", aliases: ["えりんぎ"], imagePath: "/static/eringi.png" },
+  { id: 78, name: "えのき", aliases: ["エノキ", "エノキタケ"], imagePath: "/static/enoki.png" },
+  { id: 79, name: "しいたけ", aliases: ["シイタケ", "椎茸"], imagePath: "/static/shiitake.png" },
+  { id: 80, name: "しょうが", aliases: ["ショウガ", "生姜"], imagePath: "/static/syouga.png" },
 ];
 
-const nameIndex = new Map<string, Product>();
 const idIndex = new Map<number, Product>();
 for (const product of PRODUCTS) {
   idIndex.set(product.id, product);
-  nameIndex.set(product.name, product);
-  for (const alias of product.aliases) {
-    nameIndex.set(alias, product);
-  }
 }
 
 export class ProductRepository {
@@ -101,9 +101,10 @@ export class ProductRepository {
   public findByNames(names: string[]) {
     const productSet = new Set<Product>();
     for (const name of names) {
-      const product = nameIndex.get(name);
-      if (product != null) {
-        productSet.add(product);
+      for (const product of PRODUCTS) {
+        if (product.name.includes(name) || product.aliases.some(alias => alias.includes(name))) {
+          productSet.add(product);
+        }
       }
     }
     return [...productSet.values()];
