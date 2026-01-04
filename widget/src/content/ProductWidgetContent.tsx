@@ -1,5 +1,6 @@
 import { useOpenAiGlobal } from "../hooks/use-openai-global";
 import { clsx } from "clsx";
+import { ENV } from "../utils/Env";
 
 export type ProductWidgetToolOutput = {
   products: {
@@ -25,7 +26,7 @@ export function ProductWidgetContent() {
             { product.imagePath != null &&
               <img
                 className="w-[60px] h-[60px]"
-                src={`https://chatgpt-sample-app-481008.an.r.appspot.com/${product.imagePath}`}/>
+                src={`${ENV.baseUrl}/${product.imagePath}`}/>
             }
             { product.name }
           </div>

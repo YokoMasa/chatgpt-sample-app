@@ -3,6 +3,7 @@ import { useOpenAiGlobal } from "../hooks/use-openai-global";
 import { Button } from "@openai/apps-sdk-ui/components/Button";
 import { ExternalLink } from "@openai/apps-sdk-ui/components/Icon";
 import { useCallback } from "react";
+import { ENV } from "../utils/Env";
 
 export type CartWidgetToolOutput = {
   items: {
@@ -19,7 +20,7 @@ export function CartWidgetContent() {
   const theme = useOpenAiGlobal("theme");
 
   const handleOpenInExternalTabClick = useCallback(() => {
-    window.openai.openExternal({ href: "https://chatgpt-sample-app-481008.an.r.appspot.com/" });
+    window.openai.openExternal({ href: ENV.baseUrl });
   }, []);
 
   return (
@@ -39,7 +40,7 @@ export function CartWidgetContent() {
               { item.productImagePath != null &&
                 <img
                   className="w-[60px] h-[60px]"
-                  src={`https://chatgpt-sample-app-481008.an.r.appspot.com/${item.productImagePath}`}/>
+                  src={`${ENV.baseUrl}/${item.productImagePath}`}/>
               }
               <span>
                 { item.productName }

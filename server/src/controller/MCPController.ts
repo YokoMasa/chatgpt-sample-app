@@ -25,7 +25,16 @@ const mcpServer = new McpServer({
 mcpServer.registerResource(
   "product-widget",
   "ui://widget/product-widget.html",
-  {},
+  {
+    _meta: {
+      "openai/widgetDescription": "This widget shows detailed information about a single product.",
+      "openai/widgetPrefersBorder": true,
+      "openai/widgetCSP": {
+        connect_domains: [ENV.baseUrl],
+        resource_domains: [ENV.baseUrl]
+      }
+    }
+  },
   async () => ({
     contents: [
       {
@@ -40,7 +49,16 @@ mcpServer.registerResource(
 mcpServer.registerResource(
   "cart-widget",
   "ui://widget/cart-widget.html",
-  {},
+  {
+    _meta: {
+      "openai/widgetDescription": "This widget shows current items in cart.",
+      "openai/widgetPrefersBorder": true,
+      "openai/widgetCSP": {
+        connect_domains: [ENV.baseUrl],
+        resource_domains: [ENV.baseUrl]
+      }
+    }
+  },
   async () => ({
     contents: [
       {

@@ -1,6 +1,6 @@
 import { readdir } from "fs/promises";
 
-export  async function listWidgetSources() {
+export async function listWidgetSources() {
   const fileNames = await readdir("src");
   return fileNames
     .filter(name => name.endsWith(".tsx"))
