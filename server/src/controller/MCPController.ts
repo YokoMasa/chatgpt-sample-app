@@ -25,22 +25,22 @@ const mcpServer = new McpServer({
 mcpServer.registerResource(
   "product-widget",
   "ui://widget/product-widget.html",
-  {
-    _meta: {
-      "openai/widgetDescription": "This widget shows detailed information about a single product.",
-      "openai/widgetPrefersBorder": true,
-      "openai/widgetCSP": {
-        connect_domains: [ENV.baseUrl],
-        resource_domains: [ENV.baseUrl]
-      }
-    }
-  },
+  {},
   async () => ({
     contents: [
       {
         uri: "ui://widget/product-widget.html",
         mimeType: "text/html+skybridge",
-        text: productWidgetHtml.trim()
+        text: productWidgetHtml.trim(),
+        _meta: {
+          "openai/widgetDescription": "This widget shows detailed information about a single product.",
+          "openai/widgetPrefersBorder": true,
+          "openai/widgetDomain": ENV.baseUrl,
+          "openai/widgetCSP": {
+            connect_domains: [ENV.baseUrl],
+            resource_domains: [ENV.baseUrl]
+          }
+        }
       }
     ]
   })
@@ -49,22 +49,22 @@ mcpServer.registerResource(
 mcpServer.registerResource(
   "cart-widget",
   "ui://widget/cart-widget.html",
-  {
-    _meta: {
-      "openai/widgetDescription": "This widget shows current items in cart.",
-      "openai/widgetPrefersBorder": true,
-      "openai/widgetCSP": {
-        connect_domains: [ENV.baseUrl],
-        resource_domains: [ENV.baseUrl]
-      }
-    }
-  },
+  {},
   async () => ({
     contents: [
       {
         uri: "ui://widget/cart-widget.html",
         mimeType: "text/html+skybridge",
-        text: cartWidgetHtml.trim()
+        text: cartWidgetHtml.trim(),
+        _meta: {
+          "openai/widgetDescription": "This widget shows current items in cart.",
+          "openai/widgetPrefersBorder": true,
+          "openai/widgetDomain": ENV.baseUrl,
+          "openai/widgetCSP": {
+            connect_domains: [ENV.baseUrl],
+            resource_domains: [ENV.baseUrl]
+          }
+        }
       }
     ]
   })
