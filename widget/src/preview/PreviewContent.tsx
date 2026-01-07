@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { notifyGlobalsChange } from "../types";
 
-export function PreviewControllerContent() {
+export function PreviewContent() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const handleThemeChange = useCallback((isDarkMode: boolean) => {

@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "node build.mjs",
-    "dev": "node serve.mjs"
+    "build2": "node build.mjs",
+    "build": "vite build && rm -f ../server/widget/* ../server/public/assets/* && cp dist/*.html ../server/widget && cp -r dist/assets ../server/public",
+    "dev2": "node serve.mjs",
+    "dev": "vite"
   },
   "author": "",
   "license": "ISC",

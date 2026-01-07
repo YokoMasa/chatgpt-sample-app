@@ -5,5 +5,3 @@
 @source "../node_modules/@openai/apps-sdk-ui";
 
 @custom-variant dark (&:where(.dark, .dark *));
-@source "../build.mjs";
-@source "../serve.mjs";
