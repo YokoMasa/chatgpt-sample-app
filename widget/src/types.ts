@@ -89,7 +89,7 @@ export class SetGlobalsEvent extends CustomEvent<{
   readonly type = SET_GLOBALS_EVENT_TYPE;
 }
 
-export function notifyGlobalsChange() {
+export function notifyOpenaiGlobalsChange() {
   window.dispatchEvent(new CustomEvent(SET_GLOBALS_EVENT_TYPE, { detail: { globals: window.openai } }));
 }
 

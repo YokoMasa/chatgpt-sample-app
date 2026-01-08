@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { Button } from "@openai/apps-sdk-ui/components/Button";
 import { ExternalLink } from "@openai/apps-sdk-ui/components/Icon";
-import { useCallback } from "react";
+import { Fragment, useCallback } from "react";
 import { ENV } from "../utils/Env";
 import { useOpenAiGlobal } from "../hooks/UseOpenaiGlobal";
 
@@ -35,7 +35,7 @@ export function CartWidgetContent() {
       <div
         className={"grid grid-cols-[max-content_1fr] gap-3"}>
         { toolOutput != null && toolOutput.items.map(item => (
-          <>
+          <Fragment key={item.id}>
             <div className="flex items-center gap-x-2">
               { item.productImagePath != null &&
                 <img
@@ -49,7 +49,7 @@ export function CartWidgetContent() {
             <div className="self-center">
               ×{ item.quantity }個
             </div>
-          </>
+          </Fragment>
         )) }
 
         { toolOutput != null && toolOutput.items.length === 0 &&

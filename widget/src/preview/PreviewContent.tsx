@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
-import { notifyGlobalsChange } from "../types";
+import { notifyOpenaiGlobalsChange } from "../types";
 import { clsx } from "clsx";
+import { ToolOutputSetting } from "./ToolOutputSetting";
 
 export type PreviewContentProps = {
   previewContentWrapperEl: HTMLElement;
@@ -20,7 +21,7 @@ export function PreviewContent({
       previewContentWrapperEl.style.backgroundColor = "#FFFFFF";
       window.openai.theme = "light";
     }
-    notifyGlobalsChange();
+    notifyOpenaiGlobalsChange();
   }, [
     setIsDarkMode,
     previewContentWrapperEl
@@ -46,7 +47,7 @@ export function PreviewContent({
             <label
               htmlFor="ctrl-theme-dark"
               className={clsx(
-                "p-2 border",
+                "p-2 border rounded-sm cursor-pointer",
                 isDarkMode ? "border-transparent" : "border-black"
               )}>
               ライト
@@ -62,13 +63,18 @@ export function PreviewContent({
             <label
               htmlFor="ctrl-theme-light"
               className={clsx(
-                "p-2 border",
+                "p-2 border rounded-sm cursor-pointer",
                 isDarkMode ? "border-black" : "border-transparent"
               )}>
               ダーク
             </label>
           </div>
         </div>
+
+        <div className="font-bold self-center">
+          toolOutput:
+        </div>
+        <ToolOutputSetting/>
       </div>
     </div>
   );

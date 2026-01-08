@@ -29,7 +29,7 @@ npm run dev
 
 ![プレビューサーバー](./resources/preview_server.png)
 
-ウィジェットのプレビューに必要なwindow.openaiのデータは`widget/src/content/XxxxMockInitializer.ts`で自由に定義することができます。
+ウィジェットのプレビューに必要なwindow.openaiのデータは`widget/XXXX.mock.json`で自由に定義することができます。
 
 ### ウィジェットのビルド
 下記のコマンドでウィジェットをビルドすることができます。chatgptのiframeにそのまま埋め込むことが可能なHTMLファイルが`widget/dist`配下に生成されるので、それらをそのままMCPのresourceに含めることができます。
@@ -37,6 +37,3 @@ npm run dev
 cd widget
 npm run build
 ```
-
-## サーバー側の開発
-サーバー側はとある
