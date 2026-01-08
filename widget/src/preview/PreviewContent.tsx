@@ -1,30 +1,38 @@
 import { useCallback, useState } from "react";
 import { notifyGlobalsChange } from "../types";
+import { clsx } from "clsx";
 
-export function PreviewContent() {
+export type PreviewContentProps = {
+  previewContentWrapperEl: HTMLElement;
+}
+
+export function PreviewContent({
+  previewContentWrapperEl
+}: PreviewContentProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const handleThemeChange = useCallback((isDarkMode: boolean) => {
     setIsDarkMode(isDarkMode);
     if (isDarkMode) {
-      document.getElementById("root")!.style.backgroundColor = "#212121";
+      previewContentWrapperEl.style.backgroundColor = "#212121";
       window.openai.theme = "dark";
     } else {
-      document.getElementById("root")!.style.backgroundColor = "#FFFFFF";
+      previewContentWrapperEl.style.backgroundColor = "#FFFFFF";
       window.openai.theme = "light";
     }
     notifyGlobalsChange();
   }, [
-    setIsDarkMode
+    setIsDarkMode,
+    previewContentWrapperEl
   ]);
 
   return (
     <div>
-      <h2 className="my-3 text-xl">
-        コントロールパネル
+      <h2 className="text-2xl">
+        プレビュー設定
       </h2>
-      <div className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2">
-        <div className="font-bold">
+      <div className="mt-3 grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2">
+        <div className="font-bold self-center">
           テーマ:
         </div>
         <div className="flex items-center gap-x-2">
@@ -36,7 +44,11 @@ export function PreviewContent() {
               onChange={() => handleThemeChange(false)}
               id="ctrl-theme-dark"/>
             <label
-              htmlFor="ctrl-theme-dark">
+              htmlFor="ctrl-theme-dark"
+              className={clsx(
+                "p-2 border",
+                isDarkMode ? "border-transparent" : "border-black"
+              )}>
               ライト
             </label>
           </div>
@@ -48,7 +60,11 @@ export function PreviewContent() {
               onChange={() => handleThemeChange(true)}
               id="ctrl-theme-light"/>
             <label
-              htmlFor="ctrl-theme-light">
+              htmlFor="ctrl-theme-light"
+              className={clsx(
+                "p-2 border",
+                isDarkMode ? "border-black" : "border-transparent"
+              )}>
               ダーク
             </label>
           </div>

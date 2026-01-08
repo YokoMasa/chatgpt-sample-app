@@ -1,4 +1,4 @@
-import { useOpenAiGlobal } from "../hooks/use-openai-global";
+import { useOpenAiGlobal } from "../hooks/UseOpenaiGlobal";
 import { clsx } from "clsx";
 import { ENV } from "../utils/Env";
 
@@ -26,7 +26,7 @@ export function ProductWidgetContent() {
             { product.imagePath != null &&
               <img
                 className="w-[60px] h-[60px]"
-                src={`${ENV.baseUrl}/${product.imagePath}`}/>
+                src={`${ENV.baseUrl}${product.imagePath}`}/>
             }
             { product.name }
           </div>

@@ -2,5 +2,6 @@ node_modules
 dist
 .env
 server/widget
+server/public/assets
 server/app.yaml
 deploy.sh

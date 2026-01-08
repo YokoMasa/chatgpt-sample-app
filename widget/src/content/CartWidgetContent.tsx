@@ -1,9 +1,9 @@
 import { clsx } from "clsx";
-import { useOpenAiGlobal } from "../hooks/use-openai-global";
 import { Button } from "@openai/apps-sdk-ui/components/Button";
 import { ExternalLink } from "@openai/apps-sdk-ui/components/Icon";
 import { useCallback } from "react";
 import { ENV } from "../utils/Env";
+import { useOpenAiGlobal } from "../hooks/UseOpenaiGlobal";
 
 export type CartWidgetToolOutput = {
   items: {
@@ -40,7 +40,7 @@ export function CartWidgetContent() {
               { item.productImagePath != null &&
                 <img
                   className="w-[60px] h-[60px]"
-                  src={`${ENV.baseUrl}/${item.productImagePath}`}/>
+                  src={`${ENV.baseUrl}${item.productImagePath}`}/>
               }
               <span>
                 { item.productName }

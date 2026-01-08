@@ -1,8 +1,9 @@
-import { defineConfig, Plugin } from "vite";
+import { readFileSync } from 'node:fs';
+import { defineConfig } from "vite";
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-function widgetPreviewPlugin(): Plugin {
+function widgetPreviewPlugin() {
   return {
     name: "vite-plugin-widget-preview",
     transformIndexHtml: {
@@ -13,7 +14,21 @@ function widgetPreviewPlugin(): Plugin {
           return html;
         }
 
+        const base = context.filename.split(".")[0];
+        const mockJsonPath = `${base}.mock.json`;
+        let mockJson = {};
+        try {
+          const mockJsonStr = readFileSync(mockJsonPath, { encoding: "utf-8" });
+          mockJson = JSON.parse(mockJsonStr);
+        } catch (e) {
+          console.warn(`Failed to load mock json (${mockJsonPath}). error: ${e.message ?? e.toString()}`);
+        }
+
         return [
+          {
+            tag: "script",
+            children: `window.openai = ${JSON.stringify(mockJson)}`
+          },
           {
             tag: "script",
             attrs: {

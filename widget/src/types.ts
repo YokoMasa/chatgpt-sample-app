@@ -99,6 +99,7 @@ export function notifyGlobalsChange() {
 declare global {
   interface Window {
     openai: API & OpenAiGlobals;
+    _mockJsonPath: string | undefined;
   }
 
   interface WindowEventMap {
