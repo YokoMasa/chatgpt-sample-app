@@ -8,8 +8,12 @@ handlers:
   - url: /favicon\.png
     static_files: public/favicon.png
     upload: public/favicon\.png
+    http_headers:
+      Access-Control-Allow-Origin: https://chatgpt.com
   - url: /static
     static_dir: public
+    http_headers:
+      Access-Control-Allow-Origin: https://chatgpt.com
   - url: /.*
     secure: always
     redirect_http_response_code: 301

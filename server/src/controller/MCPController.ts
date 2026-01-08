@@ -75,6 +75,11 @@ mcpServer.registerTool(
   {
     title: "searchProductByNames",
     description: "Search products by names.",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      openWorldHint: false
+    },
     inputSchema: {
       names: z.array(z.string())
     },
@@ -104,6 +109,11 @@ mcpServer.registerTool(
   {
     title: "updateItemsInCart",
     description: "Put specified items in the cart. Items not specified in the tool call input but already put in the cart are removed from the cart.",
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      openWorldHint: false
+    },
     inputSchema: {
       items: z.array(
         z.object({
@@ -169,6 +179,11 @@ mcpServer.registerTool(
   {
     title: "listItemsInCart",
     description: "List items in cart.",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      openWorldHint: false
+    },
     _meta: {
       "openai/outputTemplate": "ui://widget/cart-widget.html"
     }
@@ -218,8 +233,7 @@ const bearerAuthMiddleware = requireBearerAuth({
 controller.post('/', bearerAuthMiddleware, async (req, res) => {
   try {
     const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: undefined,
-      enableJsonResponse: true
+      enableJsonResponse: true,
     });
     
     res.on('close', () => {

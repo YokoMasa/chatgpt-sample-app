@@ -42,7 +42,10 @@ function widgetPreviewPlugin() {
   };
 }
 
+const baseUrl = process.env.SERVER_BASE_URL ?? "http://localhost:3000";
+
 export default defineConfig({
+  base: baseUrl + "/static",
   build: {
     rollupOptions: {
       input: [

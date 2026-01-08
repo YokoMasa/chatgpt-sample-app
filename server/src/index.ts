@@ -1,6 +1,7 @@
 import "./init.js";
 import express, { type ErrorRequestHandler } from "express";
 import session from "express-session";
+import cors from "cors";
 import { handlebarsEngine } from "./view/HandlebarsEngine.js";
 import MyPageController from "./controller/MyPageController.js";
 import NotFoundController from "./controller/NotFoundController.js";
@@ -35,8 +36,14 @@ expressApp.use(session({
   unset: "destroy"
 }));
 
-// request logger
+// Development only
 if (!ENV.isProd) {
+  expressApp.use(cors({
+    origin: [
+      "http://localhost:6274", // MCP JAM inspector
+      "http://localhost:5173" // Widget preview server
+    ]
+  }));
   expressApp.use((req, _, next) => {
     console.log(`URL: ${req.url}, BODY: ${req.body != null ? JSON.stringify(req.body) : "null" }`);
     next();
@@ -45,7 +52,13 @@ if (!ENV.isProd) {
 
 // controllers
 if (!ENV.isProd) {
-  expressApp.use("/static", express.static("public"));
+  expressApp.use("/static", express.static("public", {
+    setHeaders: (res, path) => {
+      if (path.endsWith(".js")) {
+        res.setHeader("Content-Type", "text/javascript");
+      }
+    }
+  }));
 }
 expressApp.use("/login", LoginController);
 expressApp.use("/logout", LogoutController);
