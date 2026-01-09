@@ -3,13 +3,13 @@ import { useOpenAiGlobal } from "../hooks/UseOpenaiGlobal";
 import { Button } from "@openai/apps-sdk-ui/components/Button";
 import { notifyOpenaiGlobalsChange } from "../types";
 
-export function ToolOutputSetting() {
-  const toolOutput = useOpenAiGlobal("toolOutput");
+export function ToolInputSetting() {
+  const toolInput = useOpenAiGlobal("toolInput");
   const [isEditing, setIsEditing] = useState(false);
 
-  const currentValue = toolOutput == null
+  const currentValue = toolInput == null
     ? ""
-    : JSON.stringify(toolOutput, null, 2);
+    : JSON.stringify(toolInput, null, 2);
 
   if (!isEditing) {
     return (
@@ -29,11 +29,11 @@ export function ToolOutputSetting() {
       </div>
     );
   } else {
-    return <ToolOutputEditor value={currentValue} onFinish={() => setIsEditing(false)}/>
+    return <ToolInputEditor value={currentValue} onFinish={() => setIsEditing(false)}/>
   }
 }
 
-function ToolOutputEditor({
+function ToolInputEditor({
   value: initialValue,
   onFinish
 }: {
@@ -54,7 +54,7 @@ function ToolOutputEditor({
   ]);
 
   const handleSave = useCallback(() => {
-    window.openai.toolOutput = JSON.parse(value);
+    window.openai.toolInput = JSON.parse(value);
     notifyOpenaiGlobalsChange();
     onFinish();
   }, [

@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { notifyOpenaiGlobalsChange } from "../types";
 import { clsx } from "clsx";
 import { ToolOutputSetting } from "./ToolOutputSetting";
+import { ToolInputSetting } from "./ToolInputSetting";
 
 export type PreviewContentProps = {
   previewContentWrapperEl: HTMLElement;
@@ -32,7 +33,7 @@ export function PreviewContent({
       <h2 className="text-2xl">
         プレビュー設定
       </h2>
-      <div className="mt-3 grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2">
+      <div className="mt-3 grid grid-cols-[max-content_1fr] gap-x-4 gap-y-6">
         <div className="font-bold self-center">
           テーマ:
         </div>
@@ -70,6 +71,11 @@ export function PreviewContent({
             </label>
           </div>
         </div>
+
+        <div className="font-bold self-center">
+          toolInput:
+        </div>
+        <ToolInputSetting/>
 
         <div className="font-bold self-center">
           toolOutput:

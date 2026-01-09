@@ -9,11 +9,11 @@ handlers:
     static_files: public/favicon.png
     upload: public/favicon\.png
     http_headers:
-      Access-Control-Allow-Origin: https://chatgpt.com
+      Access-Control-Allow-Origin: "{{WIDGET_IFRAME_ORIGIN}}"
   - url: /static
     static_dir: public
     http_headers:
-      Access-Control-Allow-Origin: https://chatgpt.com
+      Access-Control-Allow-Origin: "{{WIDGET_IFRAME_ORIGIN}}"
   - url: /.*
     secure: always
     redirect_http_response_code: 301

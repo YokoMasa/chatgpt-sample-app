@@ -14,7 +14,7 @@ document.body.replaceChildren();
 document.body.insertAdjacentHTML("afterbegin", `
 <div class="grid grid-cols-[1fr_400px]">
   <div id="_preview-control-panel" class="p-4 h-screen border-r"></div>
-  <div id="_preview-content-wrapper" class="p-4">
+  <div id="_preview-content-wrapper">
     <div id="_preview-content">
     </div>
   </div>

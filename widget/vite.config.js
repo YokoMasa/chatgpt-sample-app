@@ -1,11 +1,36 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { defineConfig } from "vite";
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+const entrypointHtmlFileNames = readdirSync(".")
+  .filter(fileName => fileName.endsWith(".html"));
+
 function widgetPreviewPlugin() {
   return {
     name: "vite-plugin-widget-preview",
+    configureServer: (server) => {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === "/") {
+          res.setHeader("Content-Type", "text/html");
+          res.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8"/>
+              <title>プレビュー</title>
+            </head>
+            <body>
+              <ul>${entrypointHtmlFileNames.map(fileName => `<li><a href="/${fileName}">${fileName}</a></li>`)}</ul>
+            </body>
+          </html>  
+          `);
+          res.end();
+        } else {
+          next();
+        }
+      })
+    },
     transformIndexHtml: {
       order: "pre",
       handler: (html, context) => {
@@ -42,16 +67,14 @@ function widgetPreviewPlugin() {
   };
 }
 
-const baseUrl = process.env.SERVER_BASE_URL ?? "http://localhost:3000";
-
+const base = process.env.SERVER_BASE_URL != null
+  ? process.env.SERVER_BASE_URL + "/static"
+  : "http://localhost:3000"
 export default defineConfig({
-  base: baseUrl + "/static",
+  base: base,
   build: {
     rollupOptions: {
-      input: [
-        "./CartWidget.html",
-        "./ProductWidget.html",
-      ],
+      input: entrypointHtmlFileNames.map(fileName => `./${fileName}`),
       output: {
         dir: "dist"
       }

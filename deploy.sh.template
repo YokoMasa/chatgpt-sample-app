@@ -1,16 +1,19 @@
 #!/bin/bash
-export SERVER_BASE_URL=""
-export GCP_PROJECT_ID=""
+export SERVER_BASE_URL="https://exmaple.appspot.com"
+export WIDGET_IFRAME_ORIGIN="https://example.web-sandbox.oaiusercontent.com"
+export GCP_PROJECT_ID="example"
 
 # Build widget
 cd widget
-npm run build
+VITE_BASE_URL=${SERVER_BASE_URL} npx vite build
 mkdir -p ../server/widget
-cp dist/* ../server/widget
+cp dist/*.html ../server/widget
+cp -r dist/assets ../server/public
 
 # Create deploy file
 cd ../server
 cat ./app.yaml.template | sed -e "s/{{SERVER_BASE_URL}}/$(echo ${SERVER_BASE_URL} | sed -r -e "s/\//\\\\\//g" -e "s/\./\\\./g")/" > app.yaml
+sed -i -e "s/{{WIDGET_IFRAME_ORIGIN}}/$(echo ${WIDGET_IFRAME_ORIGIN} | sed -r -e "s/\//\\\\\//g" -e "s/\./\\\./g")/" app.yaml
 
 # Deploy
 gcloud app deploy --project ${GCP_PROJECT_ID}
