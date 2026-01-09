@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 import { ENV } from "../utils/Env";
 import { useMemo, useState } from "react";
 import { Button } from "@openai/apps-sdk-ui/components/Button";
-import { Plus as PlusIcon } from "@openai/apps-sdk-ui/components/Icon"
+import { Plus as PlusIcon } from "@openai/apps-sdk-ui/components/Icon";
 
 
 export type ProductWidgetToolInput = {
@@ -45,11 +45,12 @@ export function ProductWidgetContent() {
   
   return (
     <div
+      data-theme={theme === "dark" ? "dark" : undefined}
       className={clsx(
         theme === "dark" ? "dark" : undefined,
         "dark:text-white"
       )}>
-      <h2 className="text-xl mt-3 mb-2">
+      <h2 className="text-xl mb-2">
         検索結果
       </h2>
       { toolInput != null && toolInput.names.length !== 0 &&
