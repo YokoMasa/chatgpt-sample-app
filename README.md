@@ -1,7 +1,6 @@
 # 概要
 下記で自由に触ることができます。  
-https://chatgpt-sample-app-481008.an.r.appspot.com
-
+[https://chatgpt-sample-app-481008.an.r.appspot.com](https://chatgpt-sample-app-481008.an.r.appspot.com)
 
 - ログインID  
   任意の文字列
@@ -17,7 +16,7 @@ https://chatgpt-sample-app-481008.an.r.appspot.com
 詳しくはウィジェットの実装や[Apps SDKのドキュメント](https://developers.openai.com/apps-sdk/build/chatgpt-ui#author-the-react-component)をご覧ください。
 
 ### ウィジェットのプレビュー
-下記のコマンドでウィジェットのプレビューサーバー（http://localhost:5173）が立ち上がります。プレビューではライト/ダークモード、toolInput、toolOutputを設定しインタラクティブにウィジェットの見た目の確認をすることができます。
+下記のコマンドでウィジェットのプレビューサーバー（[http://localhost:5173](http://localhost:5173)）が立ち上がります。プレビューではライト/ダークモード、toolInput、toolOutputを設定しインタラクティブにウィジェットの見た目の確認をすることができます。
 ```bash
 cd widget
 npm i
@@ -43,7 +42,7 @@ MCPエンドポイント（OAuth リソースサーバー）、認証エンド�
 ### ローカル実行
 ※サーバー実行時にウィジェットのビルド済みコードを読む必要があるため、先にウィジェットのビルドを行ってからサーバーの実行をしてください。
 
-下記のコマンドでサーバー（http://localhost:3000）が立ちあがります。
+下記のコマンドでサーバー（[http://localhost:3000](http://localhost:3000)）が立ちあがります。
 サーバーのログにテスト用のアクセストークンが表示され、これをmcpエンドポイントの認証（ユーザーID: TEST1111）に使うことができます。
 
 ```bash
@@ -87,7 +86,7 @@ chmod +x deploy.sh
 # ChatGTP上でアプリを利用する方法
 詳細な手順は[ChatGPTのドキュメント](https://developers.openai.com/apps-sdk/deploy/connect-chatgpt)をご覧ください。
 
-「MCPサーバーのURL」は「https://chatgpt-sample-app-481008.an.r.appspot.com/mcp」、「認証」は「OAuth」です。
+「MCPサーバーのURL」は「[https://chatgpt-sample-app-481008.an.r.appspot.com/mcp](https://chatgpt-sample-app-481008.an.r.appspot.com/mcp)」、「認証」は「OAuth」です。
 
 インスタンスはアクセスが無いとシャットダウンされメモリの内容が失われるため、一度作成したアプリをしばらくしてから再度使おうとすると○×商店の認証画面に再度飛ばされます。が、OAuthクライアント情報も失われているので「Invalid Client ID」といったエラーが表示されます。
 
