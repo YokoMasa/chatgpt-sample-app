@@ -26,6 +26,7 @@ expressApp.engine("html", handlebarsEngine);
 expressApp.set("view engine", "html");
 expressApp.set("views", "src/view/templates");
 
+// other settings
 expressApp.set("trust proxy", 1);
 expressApp.set("x-powered-by", false);
 expressApp.use(express.json());
@@ -48,18 +49,11 @@ if (!ENV.isProd) {
     console.log(`URL: ${req.url}, BODY: ${req.body != null ? JSON.stringify(req.body) : "null" }`);
     next();
   });
+  expressApp.use("/static", express.static("public"));
+  expressApp.use("/assets", express.static("public/assets"));
 }
 
 // controllers
-if (!ENV.isProd) {
-  expressApp.use("/static", express.static("public", {
-    setHeaders: (res, path) => {
-      if (path.endsWith(".js")) {
-        res.setHeader("Content-Type", "text/javascript");
-      }
-    }
-  }));
-}
 expressApp.use("/login", LoginController);
 expressApp.use("/logout", LogoutController);
 expressApp.use("/mypage", MyPageController);

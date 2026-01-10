@@ -1,6 +1,12 @@
 #!/bin/bash
+
+# App Engine endpoint url
 export SERVER_BASE_URL="https://exmaple.appspot.com"
+
+# chatgpt irame origin. see '_meta["openai/widgetDomain"]' section of https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields 
 export WIDGET_IFRAME_ORIGIN="https://example.web-sandbox.oaiusercontent.com"
+
+# GCP Project id
 export GCP_PROJECT_ID="example"
 
 # Build widget

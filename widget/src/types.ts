@@ -1,3 +1,6 @@
+// Copied from ↓
+// https://github.com/openai/openai-apps-sdk-examples/blob/ac8a7f6a182628b37d306223db95b577cc8c4b33/src/types.ts
+
 export type OpenAiGlobals<
   ToolInput = UnknownObject,
   ToolOutput = UnknownObject,
